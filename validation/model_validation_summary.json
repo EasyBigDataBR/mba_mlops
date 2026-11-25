@@ -1,0 +1,161 @@
+{
+  "status": "PASS",
+  "execution_environment": "LOCAL Python CPU; not Databricks",
+  "recorded_at_utc": "2026-11-25T11:15:47.861179+00:00",
+  "data_kind": "SYNTHETIC_DEMONSTRATION",
+  "contract_tests": {
+    "tests": 15,
+    "seconds": 0.056,
+    "status": "PASS"
+  },
+  "scientific_validation": {
+    "initial": {
+      "status": "PASS",
+      "counts": {
+        "rows": 98,
+        "pre_days": 84,
+        "post_days": 14
+      },
+      "as_of": "2026-11-03",
+      "summary": {
+        "actual_average": 210.57142857142858,
+        "actual_cumulative": 2948.0,
+        "predicted_average": 177.02266943823813,
+        "predicted_average_lower": 171.9580627573381,
+        "predicted_average_upper": 181.81936843293394,
+        "predicted_cumulative": 2478.3173721353337,
+        "predicted_cumulative_lower": 2407.4128786027336,
+        "predicted_cumulative_upper": 2545.471158061075,
+        "average_effect": 33.54875913319046,
+        "average_effect_lower": 28.752060138494613,
+        "average_effect_upper": 38.613365814090464,
+        "cumulative_effect": 469.6826278646663,
+        "cumulative_effect_lower": 402.5288419389246,
+        "cumulative_effect_upper": 540.5871213972665,
+        "relative_effect": 0.19082224077186705,
+        "relative_effect_lower": 0.15813550967915432,
+        "relative_effect_upper": 0.22455207609864367,
+        "posterior_tail_probability": 0.0033222591362126247
+      },
+      "timing": {
+        "main_fit_seconds": 4.313127436999821,
+        "total_seconds": 10.694867323999915
+      },
+      "checks": {
+        "json_without_nan": true,
+        "effect_equals_observed_minus_counterfactual": true,
+        "cumulative_mean_equals_sum_of_effects": true,
+        "last_cumulative_interval_matches_google_summary": true,
+        "intervals_ordered": true,
+        "pre_accumulation_is_null": true,
+        "cumulative_lower_minus_sum_daily_lower": 389.41354769285283,
+        "cumulative_upper_minus_sum_daily_upper": -392.3876515803089,
+        "placebo_uses_only_pre_70_plus_14": true,
+        "post_outcome_masking": {
+          "passed": true,
+          "post_outcome_added_each_day": 17,
+          "max_counterfactual_difference": 0.0,
+          "expected_cumulative_effect_difference": 238
+        }
+      }
+    },
+    "final": {
+      "status": "PASS",
+      "counts": {
+        "rows": 119,
+        "pre_days": 84,
+        "post_days": 35
+      },
+      "as_of": "2026-11-24",
+      "summary": {
+        "actual_average": 209.28571428571428,
+        "actual_cumulative": 7325.0,
+        "predicted_average": 179.78331990540926,
+        "predicted_average_lower": 175.88601551998025,
+        "predicted_average_upper": 183.8314960256429,
+        "predicted_cumulative": 6292.416196689324,
+        "predicted_cumulative_lower": 6156.010543199309,
+        "predicted_cumulative_upper": 6434.102360897501,
+        "average_effect": 29.50239438030502,
+        "average_effect_lower": 25.454218260071404,
+        "average_effect_upper": 33.39969876573405,
+        "cumulative_effect": 1032.5838033106756,
+        "cumulative_effect_lower": 890.8976391024992,
+        "cumulative_effect_upper": 1168.9894568006919,
+        "relative_effect": 0.16478385423559908,
+        "relative_effect_lower": 0.13846561337499672,
+        "relative_effect_upper": 0.18989400198874945,
+        "posterior_tail_probability": 0.0033222591362126247
+      },
+      "timing": {
+        "main_fit_seconds": 3.5921224679996158,
+        "total_seconds": 6.089539761999731
+      },
+      "checks": {
+        "json_without_nan": true,
+        "effect_equals_observed_minus_counterfactual": true,
+        "cumulative_mean_equals_sum_of_effects": true,
+        "last_cumulative_interval_matches_google_summary": true,
+        "intervals_ordered": true,
+        "pre_accumulation_is_null": true,
+        "cumulative_lower_minus_sum_daily_lower": 1398.362003384945,
+        "cumulative_upper_minus_sum_daily_upper": -1374.3441629349952
+      }
+    }
+  },
+  "placebo": {
+    "status": "EXECUTED",
+    "pre_start": "2026-07-29",
+    "pre_end": "2026-10-06",
+    "pseudo_intervention_date": "2026-10-07",
+    "as_of": "2026-10-20",
+    "training_days": 70,
+    "holdout_days": 14,
+    "holdout_mae": 3.6480557443450397,
+    "holdout_rmse": 4.7613726701029115,
+    "pointwise_interval_coverage": 1.0,
+    "zero_inside_cumulative_interval": true,
+    "summary": {
+      "actual_average": 175.92857142857142,
+      "actual_cumulative": 2463.0,
+      "predicted_average": 174.94786457819882,
+      "predicted_average_lower": 169.72466689420347,
+      "predicted_average_upper": 180.3672785745031,
+      "predicted_cumulative": 2449.2701040947836,
+      "predicted_cumulative_lower": 2376.1453365188486,
+      "predicted_cumulative_upper": 2525.1419000430433,
+      "average_effect": 0.9807068503725986,
+      "average_effect_lower": -4.438707145931639,
+      "average_effect_upper": 6.203904534367961,
+      "cumulative_effect": 13.729895905216381,
+      "cumulative_effect_lower": -62.14190004304295,
+      "cumulative_effect_upper": 86.85466348115146,
+      "relative_effect": 0.005555987618665844,
+      "relative_effect_lower": -0.024609262842627853,
+      "relative_effect_upper": 0.03655278009869067,
+      "posterior_tail_probability": 0.38205980066445183
+    },
+    "duration_seconds": 3.349334911999904,
+    "interpretation": "Diagnóstico pré-intervenção; não prova ausência de confundimento ou validade causal."
+  },
+  "dependencies": {
+    "python": "3.12.14",
+    "tfp-causalimpact": "0.2.0",
+    "tensorflow": "2.18.1",
+    "tensorflow-probability": "0.25.0",
+    "tf-keras": "2.18.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scipy": "1.14.1",
+    "altair": "5.5.0"
+  },
+  "dependency_differences_from_tested": {},
+  "source_sha256": "da773bcf98666acf2996a16af7fbc9d7a1e84ad1e9e9aac6d88f84d36511951c",
+  "limitations": [
+    "No Databricks/cloud execution is claimed.",
+    "Synthetic data do not demonstrate effectiveness of a real campaign.",
+    "300 retained draws plus 100 warmup are a didactic setting, not a complete MCMC convergence assessment.",
+    "The Google default regression prior uses pre and post controls; post treated outcomes are masked during likelihood fitting.",
+    "The posterior tail probability is not a literal probability of causality or a release gate."
+  ]
+}

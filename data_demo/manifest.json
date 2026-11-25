@@ -1,0 +1,1090 @@
+{
+  "schema_version": "1.0.0",
+  "generator_version": "1.0.0",
+  "dataset_id": "synthetic_campaign_v1_2026-11-24_seed_20261125",
+  "synthetic": true,
+  "description": "DADOS SINTÉTICOS para ensino. Não representam campanhas, clientes ou resultados reais.",
+  "timezone": "America/Sao_Paulo",
+  "seed": 20261125,
+  "as_of": "2026-11-24",
+  "pre_start": "2026-07-29",
+  "pre_end": "2026-10-20",
+  "intervention_date": "2026-10-21",
+  "post_start": "2026-10-21",
+  "post_end": "2026-11-24",
+  "pre_days": 84,
+  "post_days_final": 35,
+  "initial_post_days": 14,
+  "outcome_column": "treated",
+  "control_columns": [
+    "control_a",
+    "control_b"
+  ],
+  "row_key": [
+    "date"
+  ],
+  "csv_contract": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "line_ending": "LF",
+    "columns": [
+      "date",
+      "treated",
+      "control_a",
+      "control_b"
+    ],
+    "date_format": "YYYY-MM-DD",
+    "numeric_type": "nonnegative_integer",
+    "unit": "conversões diárias sintéticas",
+    "missing_value": "empty field; permitted only as the intentional error in delivery 07"
+  },
+  "anchor_policy": {
+    "first_generation_default": "last complete date in America/Sao_Paulo",
+    "existing_manifest": "reuse fixed as_of and seed; never advance the scenario silently",
+    "new_scenario": "use an empty output directory and an explicit new as_of"
+  },
+  "ingestion_contract": {
+    "initial_delivery": [
+      "01_base_pre_01.csv",
+      "02_base_pre_02.csv",
+      "03_base_pre_03.csv",
+      "04_base_pre_04.csv",
+      "05_base_pos_01.csv"
+    ],
+    "subsequent_delivery": "one new file per run, in batch_number order",
+    "file_identity": [
+      "filename",
+      "sha256"
+    ],
+    "replay": "same filename and hash must be a no-op",
+    "changed_existing_file": "reject unexpected bytes/hash; publish an explicit correction as a new file",
+    "validation": "validate the complete new delivery before publishing any rows or analysis",
+    "invalid_delivery": "preserve historical rejection/quarantine; publish no partial data or new analysis",
+    "correction_08": "08 explicitly supersedes rejection 07; historical rejection must not block later valid cycles",
+    "row_write_semantics": "replace complete row on date; never add old and corrected counts",
+    "late_correction_10": "do not reduce as_of to the correction file's maximum date; keep the accepted complete calendar"
+  },
+  "snapshot_hash_contract": {
+    "algorithm": "sha256",
+    "representation": "UTF-8 CSV with LF, header date,treated,control_a,control_b, rows ordered by date, integer values, final LF",
+    "includes": "all accepted current rows after explicit date-key replacements",
+    "excludes": "rejected rows, provenance metadata and manifest instructor truth"
+  },
+  "files": [
+    {
+      "filename": "01_base_pre_01.csv",
+      "batch_number": 1,
+      "sha256": "efe3ad1ef4a09621d55b7da5eb2b6bb3b0406b46c2f1c28b47d43f34ae6ff625",
+      "byte_count": 516,
+      "row_count": 21,
+      "period_start": "2026-07-29",
+      "period_end": "2026-08-18",
+      "revision": 1,
+      "kind": "base",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Primeira parte do pré; entregar com os arquivos 02 a 05."
+    },
+    {
+      "filename": "02_base_pre_02.csv",
+      "batch_number": 2,
+      "sha256": "c2cee8093de4023b26405443f830a8ad14624aa47c2a01573bab3b97600bf0f2",
+      "byte_count": 516,
+      "row_count": 21,
+      "period_start": "2026-08-19",
+      "period_end": "2026-09-08",
+      "revision": 1,
+      "kind": "base",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Segunda parte do pré; entregar com os arquivos 01 e 03 a 05."
+    },
+    {
+      "filename": "03_base_pre_03.csv",
+      "batch_number": 3,
+      "sha256": "2699a25e43b8b668dd24f6723a9f9c11fe5456e7fd23a7e2779537a034ef6cbd",
+      "byte_count": 516,
+      "row_count": 21,
+      "period_start": "2026-09-09",
+      "period_end": "2026-09-29",
+      "revision": 1,
+      "kind": "base",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Terceira parte do pré; entregar com os arquivos 01, 02, 04 e 05."
+    },
+    {
+      "filename": "04_base_pre_04.csv",
+      "batch_number": 4,
+      "sha256": "3e9ea6fb612e4f2ee151c9db4f87cc247ea9dac9f1e4d7f6ff33be214df6e439",
+      "byte_count": 516,
+      "row_count": 21,
+      "period_start": "2026-09-30",
+      "period_end": "2026-10-20",
+      "revision": 1,
+      "kind": "base",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Última parte do pré; entregar com os arquivos 01 a 03 e 05."
+    },
+    {
+      "filename": "05_base_pos_01.csv",
+      "batch_number": 5,
+      "sha256": "8adbbeff1c8f762ff08b67d6934566399c2ffa9bcd582b4e9e18bedecdbc0e44",
+      "byte_count": 355,
+      "row_count": 14,
+      "period_start": "2026-10-21",
+      "period_end": "2026-11-03",
+      "revision": 1,
+      "kind": "base",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Primeiros 14 dias do pós; completa a carga inicial de 98 dias."
+    },
+    {
+      "filename": "06_append_pos_02.csv",
+      "batch_number": 6,
+      "sha256": "8442c4db4d1dda90ba24bfc13043d69fb70131ff40eddf3bba052e05e63ef1db",
+      "byte_count": 194,
+      "row_count": 7,
+      "period_start": "2026-11-04",
+      "period_end": "2026-11-10",
+      "revision": 1,
+      "kind": "append",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Acrescenta sete dias completos, mantendo o desenho fixo."
+    },
+    {
+      "filename": "07_append_pos_03_invalido.csv",
+      "batch_number": 7,
+      "sha256": "b1f9db8fd75cfe7fde4af6e29abddd8565f107e81f43f3d081b8595c9a180946",
+      "byte_count": 191,
+      "row_count": 7,
+      "period_start": "2026-11-11",
+      "period_end": "2026-11-17",
+      "revision": 1,
+      "kind": "append",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "REJECTED",
+      "expected_validation_errors": [
+        "2026-11-14:control_a:missing"
+      ],
+      "purpose": "Falha deliberada: um controle ausente; rejeitar o arquivo inteiro."
+    },
+    {
+      "filename": "08_correction_pos_03.csv",
+      "batch_number": 8,
+      "sha256": "1687650791f22c6cd88d60a6ab524903cae0f79e79fe22d00b0c11a8d82ae138",
+      "byte_count": 194,
+      "row_count": 7,
+      "period_start": "2026-11-11",
+      "period_end": "2026-11-17",
+      "revision": 2,
+      "kind": "correction",
+      "supersedes_files": [
+        "07_append_pos_03_invalido.csv"
+      ],
+      "revises_files": [],
+      "correction_dates": [
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15",
+        "2026-11-16",
+        "2026-11-17"
+      ],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Corrige o mesmo período de 07 e o substitui explicitamente."
+    },
+    {
+      "filename": "09_append_pos_04_efeito_atenuado.csv",
+      "batch_number": 9,
+      "sha256": "fead7e3af7353648fea8e6cf03ff3ddd079d236a6adeb4fc87de3a732d65e134",
+      "byte_count": 194,
+      "row_count": 7,
+      "period_start": "2026-11-18",
+      "period_end": "2026-11-24",
+      "revision": 1,
+      "kind": "append",
+      "supersedes_files": [],
+      "revises_files": [],
+      "correction_dates": [],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Acrescenta os últimos sete dias; o efeito sintético cai de +35 para +8 por dia."
+    },
+    {
+      "filename": "10_correction_dia_anterior.csv",
+      "batch_number": 10,
+      "sha256": "00fe118a2374c837e101129e97221de8e8d91cce1fc9ec3417d4cf904135b288",
+      "byte_count": 56,
+      "row_count": 1,
+      "period_start": "2026-10-26",
+      "period_end": "2026-10-26",
+      "revision": 2,
+      "kind": "correction",
+      "supersedes_files": [],
+      "revises_files": [
+        "05_base_pos_01.csv"
+      ],
+      "correction_dates": [
+        "2026-10-26"
+      ],
+      "expected_validation": "VALID",
+      "expected_validation_errors": [],
+      "purpose": "Corrige a contagem de um dia antigo do pós; substituir a chave date, sem somar."
+    }
+  ],
+  "run_plan": [
+    {
+      "run_number": 1,
+      "deliver_files": [
+        "01_base_pre_01.csv",
+        "02_base_pre_02.csv",
+        "03_base_pre_03.csv",
+        "04_base_pre_04.csv",
+        "05_base_pos_01.csv"
+      ],
+      "expected_cycle_status": "READY_FOR_ANALYSIS",
+      "publish_new_analysis": true,
+      "accepted_row_count": 98,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 14,
+      "accepted_as_of": "2026-11-03",
+      "snapshot_sha256": "122f99329ac1c37b6921420ec650d512dd8e9e9c1ac6f22a6011f4af7854dd88",
+      "treated_total": 17756,
+      "supersedes_rejection": null
+    },
+    {
+      "run_number": 2,
+      "deliver_files": [
+        "06_append_pos_02.csv"
+      ],
+      "expected_cycle_status": "READY_FOR_ANALYSIS",
+      "publish_new_analysis": true,
+      "accepted_row_count": 105,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 21,
+      "accepted_as_of": "2026-11-10",
+      "snapshot_sha256": "e852101e1cb5e2cb62c60f640940472b0d1983ccd7ec7a88655681c6c34f95cf",
+      "treated_total": 19286,
+      "supersedes_rejection": null
+    },
+    {
+      "run_number": 3,
+      "deliver_files": [
+        "07_append_pos_03_invalido.csv"
+      ],
+      "expected_cycle_status": "REJECTED",
+      "publish_new_analysis": false,
+      "accepted_row_count": 105,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 21,
+      "accepted_as_of": "2026-11-10",
+      "snapshot_sha256": "e852101e1cb5e2cb62c60f640940472b0d1983ccd7ec7a88655681c6c34f95cf",
+      "treated_total": 19286,
+      "supersedes_rejection": null
+    },
+    {
+      "run_number": 4,
+      "deliver_files": [
+        "08_correction_pos_03.csv"
+      ],
+      "expected_cycle_status": "READY_FOR_ANALYSIS",
+      "publish_new_analysis": true,
+      "accepted_row_count": 112,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 28,
+      "accepted_as_of": "2026-11-17",
+      "snapshot_sha256": "a04051d3f883def801599b93876216cf0045c18054705450e5353545213bcdfb",
+      "treated_total": 20807,
+      "supersedes_rejection": "07_append_pos_03_invalido.csv"
+    },
+    {
+      "run_number": 5,
+      "deliver_files": [
+        "09_append_pos_04_efeito_atenuado.csv"
+      ],
+      "expected_cycle_status": "READY_FOR_ANALYSIS",
+      "publish_new_analysis": true,
+      "accepted_row_count": 119,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 35,
+      "accepted_as_of": "2026-11-24",
+      "snapshot_sha256": "6da09b33b3e4dfbb5763a39fd0554fb4b08a847ed9782e5b6a16cd04bad911a2",
+      "treated_total": 22121,
+      "supersedes_rejection": null
+    },
+    {
+      "run_number": 6,
+      "deliver_files": [
+        "10_correction_dia_anterior.csv"
+      ],
+      "expected_cycle_status": "READY_FOR_ANALYSIS",
+      "publish_new_analysis": true,
+      "accepted_row_count": 119,
+      "accepted_pre_days": 84,
+      "accepted_post_days": 35,
+      "accepted_as_of": "2026-11-24",
+      "snapshot_sha256": "162712e19ce53b68850323b0322f842d5f1087f0be0eeece5a2de6c58655a623",
+      "treated_total": 22133,
+      "supersedes_rejection": null
+    }
+  ],
+  "instructor_truth": {
+    "do_not_ingest_as_features": true,
+    "controls_unaffected_by_intervention": true,
+    "initial_effect_per_day": 35,
+    "attenuated_effect_per_day": 8,
+    "attenuation_start": "2026-11-18",
+    "true_cumulative_effect_final": 1036,
+    "late_measurement_correction": {
+      "date": "2026-10-26",
+      "column": "treated",
+      "original_value": 176,
+      "corrected_value": 188,
+      "delta": 12,
+      "changes_pre_period": false,
+      "reason": "Uma contagem diária inicialmente subnotificada é corrigida em nova entrega."
+    },
+    "daily": [
+      {
+        "date": "2026-07-29",
+        "counterfactual": 174,
+        "true_effect": 0,
+        "treated_final": 174
+      },
+      {
+        "date": "2026-07-30",
+        "counterfactual": 184,
+        "true_effect": 0,
+        "treated_final": 184
+      },
+      {
+        "date": "2026-07-31",
+        "counterfactual": 204,
+        "true_effect": 0,
+        "treated_final": 204
+      },
+      {
+        "date": "2026-08-01",
+        "counterfactual": 185,
+        "true_effect": 0,
+        "treated_final": 185
+      },
+      {
+        "date": "2026-08-02",
+        "counterfactual": 169,
+        "true_effect": 0,
+        "treated_final": 169
+      },
+      {
+        "date": "2026-08-03",
+        "counterfactual": 159,
+        "true_effect": 0,
+        "treated_final": 159
+      },
+      {
+        "date": "2026-08-04",
+        "counterfactual": 171,
+        "true_effect": 0,
+        "treated_final": 171
+      },
+      {
+        "date": "2026-08-05",
+        "counterfactual": 180,
+        "true_effect": 0,
+        "treated_final": 180
+      },
+      {
+        "date": "2026-08-06",
+        "counterfactual": 186,
+        "true_effect": 0,
+        "treated_final": 186
+      },
+      {
+        "date": "2026-08-07",
+        "counterfactual": 197,
+        "true_effect": 0,
+        "treated_final": 197
+      },
+      {
+        "date": "2026-08-08",
+        "counterfactual": 188,
+        "true_effect": 0,
+        "treated_final": 188
+      },
+      {
+        "date": "2026-08-09",
+        "counterfactual": 175,
+        "true_effect": 0,
+        "treated_final": 175
+      },
+      {
+        "date": "2026-08-10",
+        "counterfactual": 157,
+        "true_effect": 0,
+        "treated_final": 157
+      },
+      {
+        "date": "2026-08-11",
+        "counterfactual": 170,
+        "true_effect": 0,
+        "treated_final": 170
+      },
+      {
+        "date": "2026-08-12",
+        "counterfactual": 177,
+        "true_effect": 0,
+        "treated_final": 177
+      },
+      {
+        "date": "2026-08-13",
+        "counterfactual": 175,
+        "true_effect": 0,
+        "treated_final": 175
+      },
+      {
+        "date": "2026-08-14",
+        "counterfactual": 200,
+        "true_effect": 0,
+        "treated_final": 200
+      },
+      {
+        "date": "2026-08-15",
+        "counterfactual": 187,
+        "true_effect": 0,
+        "treated_final": 187
+      },
+      {
+        "date": "2026-08-16",
+        "counterfactual": 177,
+        "true_effect": 0,
+        "treated_final": 177
+      },
+      {
+        "date": "2026-08-17",
+        "counterfactual": 145,
+        "true_effect": 0,
+        "treated_final": 145
+      },
+      {
+        "date": "2026-08-18",
+        "counterfactual": 149,
+        "true_effect": 0,
+        "treated_final": 149
+      },
+      {
+        "date": "2026-08-19",
+        "counterfactual": 164,
+        "true_effect": 0,
+        "treated_final": 164
+      },
+      {
+        "date": "2026-08-20",
+        "counterfactual": 180,
+        "true_effect": 0,
+        "treated_final": 180
+      },
+      {
+        "date": "2026-08-21",
+        "counterfactual": 195,
+        "true_effect": 0,
+        "treated_final": 195
+      },
+      {
+        "date": "2026-08-22",
+        "counterfactual": 183,
+        "true_effect": 0,
+        "treated_final": 183
+      },
+      {
+        "date": "2026-08-23",
+        "counterfactual": 172,
+        "true_effect": 0,
+        "treated_final": 172
+      },
+      {
+        "date": "2026-08-24",
+        "counterfactual": 165,
+        "true_effect": 0,
+        "treated_final": 165
+      },
+      {
+        "date": "2026-08-25",
+        "counterfactual": 183,
+        "true_effect": 0,
+        "treated_final": 183
+      },
+      {
+        "date": "2026-08-26",
+        "counterfactual": 186,
+        "true_effect": 0,
+        "treated_final": 186
+      },
+      {
+        "date": "2026-08-27",
+        "counterfactual": 189,
+        "true_effect": 0,
+        "treated_final": 189
+      },
+      {
+        "date": "2026-08-28",
+        "counterfactual": 192,
+        "true_effect": 0,
+        "treated_final": 192
+      },
+      {
+        "date": "2026-08-29",
+        "counterfactual": 186,
+        "true_effect": 0,
+        "treated_final": 186
+      },
+      {
+        "date": "2026-08-30",
+        "counterfactual": 178,
+        "true_effect": 0,
+        "treated_final": 178
+      },
+      {
+        "date": "2026-08-31",
+        "counterfactual": 154,
+        "true_effect": 0,
+        "treated_final": 154
+      },
+      {
+        "date": "2026-09-01",
+        "counterfactual": 159,
+        "true_effect": 0,
+        "treated_final": 159
+      },
+      {
+        "date": "2026-09-02",
+        "counterfactual": 168,
+        "true_effect": 0,
+        "treated_final": 168
+      },
+      {
+        "date": "2026-09-03",
+        "counterfactual": 173,
+        "true_effect": 0,
+        "treated_final": 173
+      },
+      {
+        "date": "2026-09-04",
+        "counterfactual": 194,
+        "true_effect": 0,
+        "treated_final": 194
+      },
+      {
+        "date": "2026-09-05",
+        "counterfactual": 187,
+        "true_effect": 0,
+        "treated_final": 187
+      },
+      {
+        "date": "2026-09-06",
+        "counterfactual": 175,
+        "true_effect": 0,
+        "treated_final": 175
+      },
+      {
+        "date": "2026-09-07",
+        "counterfactual": 154,
+        "true_effect": 0,
+        "treated_final": 154
+      },
+      {
+        "date": "2026-09-08",
+        "counterfactual": 169,
+        "true_effect": 0,
+        "treated_final": 169
+      },
+      {
+        "date": "2026-09-09",
+        "counterfactual": 179,
+        "true_effect": 0,
+        "treated_final": 179
+      },
+      {
+        "date": "2026-09-10",
+        "counterfactual": 189,
+        "true_effect": 0,
+        "treated_final": 189
+      },
+      {
+        "date": "2026-09-11",
+        "counterfactual": 202,
+        "true_effect": 0,
+        "treated_final": 202
+      },
+      {
+        "date": "2026-09-12",
+        "counterfactual": 184,
+        "true_effect": 0,
+        "treated_final": 184
+      },
+      {
+        "date": "2026-09-13",
+        "counterfactual": 165,
+        "true_effect": 0,
+        "treated_final": 165
+      },
+      {
+        "date": "2026-09-14",
+        "counterfactual": 154,
+        "true_effect": 0,
+        "treated_final": 154
+      },
+      {
+        "date": "2026-09-15",
+        "counterfactual": 163,
+        "true_effect": 0,
+        "treated_final": 163
+      },
+      {
+        "date": "2026-09-16",
+        "counterfactual": 166,
+        "true_effect": 0,
+        "treated_final": 166
+      },
+      {
+        "date": "2026-09-17",
+        "counterfactual": 187,
+        "true_effect": 0,
+        "treated_final": 187
+      },
+      {
+        "date": "2026-09-18",
+        "counterfactual": 200,
+        "true_effect": 0,
+        "treated_final": 200
+      },
+      {
+        "date": "2026-09-19",
+        "counterfactual": 179,
+        "true_effect": 0,
+        "treated_final": 179
+      },
+      {
+        "date": "2026-09-20",
+        "counterfactual": 176,
+        "true_effect": 0,
+        "treated_final": 176
+      },
+      {
+        "date": "2026-09-21",
+        "counterfactual": 160,
+        "true_effect": 0,
+        "treated_final": 160
+      },
+      {
+        "date": "2026-09-22",
+        "counterfactual": 167,
+        "true_effect": 0,
+        "treated_final": 167
+      },
+      {
+        "date": "2026-09-23",
+        "counterfactual": 182,
+        "true_effect": 0,
+        "treated_final": 182
+      },
+      {
+        "date": "2026-09-24",
+        "counterfactual": 192,
+        "true_effect": 0,
+        "treated_final": 192
+      },
+      {
+        "date": "2026-09-25",
+        "counterfactual": 196,
+        "true_effect": 0,
+        "treated_final": 196
+      },
+      {
+        "date": "2026-09-26",
+        "counterfactual": 183,
+        "true_effect": 0,
+        "treated_final": 183
+      },
+      {
+        "date": "2026-09-27",
+        "counterfactual": 171,
+        "true_effect": 0,
+        "treated_final": 171
+      },
+      {
+        "date": "2026-09-28",
+        "counterfactual": 158,
+        "true_effect": 0,
+        "treated_final": 158
+      },
+      {
+        "date": "2026-09-29",
+        "counterfactual": 156,
+        "true_effect": 0,
+        "treated_final": 156
+      },
+      {
+        "date": "2026-09-30",
+        "counterfactual": 168,
+        "true_effect": 0,
+        "treated_final": 168
+      },
+      {
+        "date": "2026-10-01",
+        "counterfactual": 179,
+        "true_effect": 0,
+        "treated_final": 179
+      },
+      {
+        "date": "2026-10-02",
+        "counterfactual": 201,
+        "true_effect": 0,
+        "treated_final": 201
+      },
+      {
+        "date": "2026-10-03",
+        "counterfactual": 181,
+        "true_effect": 0,
+        "treated_final": 181
+      },
+      {
+        "date": "2026-10-04",
+        "counterfactual": 171,
+        "true_effect": 0,
+        "treated_final": 171
+      },
+      {
+        "date": "2026-10-05",
+        "counterfactual": 152,
+        "true_effect": 0,
+        "treated_final": 152
+      },
+      {
+        "date": "2026-10-06",
+        "counterfactual": 169,
+        "true_effect": 0,
+        "treated_final": 169
+      },
+      {
+        "date": "2026-10-07",
+        "counterfactual": 173,
+        "true_effect": 0,
+        "treated_final": 173
+      },
+      {
+        "date": "2026-10-08",
+        "counterfactual": 185,
+        "true_effect": 0,
+        "treated_final": 185
+      },
+      {
+        "date": "2026-10-09",
+        "counterfactual": 205,
+        "true_effect": 0,
+        "treated_final": 205
+      },
+      {
+        "date": "2026-10-10",
+        "counterfactual": 186,
+        "true_effect": 0,
+        "treated_final": 186
+      },
+      {
+        "date": "2026-10-11",
+        "counterfactual": 172,
+        "true_effect": 0,
+        "treated_final": 172
+      },
+      {
+        "date": "2026-10-12",
+        "counterfactual": 149,
+        "true_effect": 0,
+        "treated_final": 149
+      },
+      {
+        "date": "2026-10-13",
+        "counterfactual": 158,
+        "true_effect": 0,
+        "treated_final": 158
+      },
+      {
+        "date": "2026-10-14",
+        "counterfactual": 177,
+        "true_effect": 0,
+        "treated_final": 177
+      },
+      {
+        "date": "2026-10-15",
+        "counterfactual": 173,
+        "true_effect": 0,
+        "treated_final": 173
+      },
+      {
+        "date": "2026-10-16",
+        "counterfactual": 201,
+        "true_effect": 0,
+        "treated_final": 201
+      },
+      {
+        "date": "2026-10-17",
+        "counterfactual": 178,
+        "true_effect": 0,
+        "treated_final": 178
+      },
+      {
+        "date": "2026-10-18",
+        "counterfactual": 180,
+        "true_effect": 0,
+        "treated_final": 180
+      },
+      {
+        "date": "2026-10-19",
+        "counterfactual": 159,
+        "true_effect": 0,
+        "treated_final": 159
+      },
+      {
+        "date": "2026-10-20",
+        "counterfactual": 167,
+        "true_effect": 0,
+        "treated_final": 167
+      },
+      {
+        "date": "2026-10-21",
+        "counterfactual": 173,
+        "true_effect": 35,
+        "treated_final": 208
+      },
+      {
+        "date": "2026-10-22",
+        "counterfactual": 184,
+        "true_effect": 35,
+        "treated_final": 219
+      },
+      {
+        "date": "2026-10-23",
+        "counterfactual": 196,
+        "true_effect": 35,
+        "treated_final": 231
+      },
+      {
+        "date": "2026-10-24",
+        "counterfactual": 185,
+        "true_effect": 35,
+        "treated_final": 220
+      },
+      {
+        "date": "2026-10-25",
+        "counterfactual": 166,
+        "true_effect": 35,
+        "treated_final": 201
+      },
+      {
+        "date": "2026-10-26",
+        "counterfactual": 153,
+        "true_effect": 35,
+        "treated_final": 188
+      },
+      {
+        "date": "2026-10-27",
+        "counterfactual": 170,
+        "true_effect": 35,
+        "treated_final": 205
+      },
+      {
+        "date": "2026-10-28",
+        "counterfactual": 173,
+        "true_effect": 35,
+        "treated_final": 208
+      },
+      {
+        "date": "2026-10-29",
+        "counterfactual": 180,
+        "true_effect": 35,
+        "treated_final": 215
+      },
+      {
+        "date": "2026-10-30",
+        "counterfactual": 194,
+        "true_effect": 35,
+        "treated_final": 229
+      },
+      {
+        "date": "2026-10-31",
+        "counterfactual": 189,
+        "true_effect": 35,
+        "treated_final": 224
+      },
+      {
+        "date": "2026-11-01",
+        "counterfactual": 176,
+        "true_effect": 35,
+        "treated_final": 211
+      },
+      {
+        "date": "2026-11-02",
+        "counterfactual": 158,
+        "true_effect": 35,
+        "treated_final": 193
+      },
+      {
+        "date": "2026-11-03",
+        "counterfactual": 173,
+        "true_effect": 35,
+        "treated_final": 208
+      },
+      {
+        "date": "2026-11-04",
+        "counterfactual": 183,
+        "true_effect": 35,
+        "treated_final": 218
+      },
+      {
+        "date": "2026-11-05",
+        "counterfactual": 193,
+        "true_effect": 35,
+        "treated_final": 228
+      },
+      {
+        "date": "2026-11-06",
+        "counterfactual": 200,
+        "true_effect": 35,
+        "treated_final": 235
+      },
+      {
+        "date": "2026-11-07",
+        "counterfactual": 200,
+        "true_effect": 35,
+        "treated_final": 235
+      },
+      {
+        "date": "2026-11-08",
+        "counterfactual": 176,
+        "true_effect": 35,
+        "treated_final": 211
+      },
+      {
+        "date": "2026-11-09",
+        "counterfactual": 163,
+        "true_effect": 35,
+        "treated_final": 198
+      },
+      {
+        "date": "2026-11-10",
+        "counterfactual": 170,
+        "true_effect": 35,
+        "treated_final": 205
+      },
+      {
+        "date": "2026-11-11",
+        "counterfactual": 175,
+        "true_effect": 35,
+        "treated_final": 210
+      },
+      {
+        "date": "2026-11-12",
+        "counterfactual": 184,
+        "true_effect": 35,
+        "treated_final": 219
+      },
+      {
+        "date": "2026-11-13",
+        "counterfactual": 200,
+        "true_effect": 35,
+        "treated_final": 235
+      },
+      {
+        "date": "2026-11-14",
+        "counterfactual": 190,
+        "true_effect": 35,
+        "treated_final": 225
+      },
+      {
+        "date": "2026-11-15",
+        "counterfactual": 185,
+        "true_effect": 35,
+        "treated_final": 220
+      },
+      {
+        "date": "2026-11-16",
+        "counterfactual": 166,
+        "true_effect": 35,
+        "treated_final": 201
+      },
+      {
+        "date": "2026-11-17",
+        "counterfactual": 176,
+        "true_effect": 35,
+        "treated_final": 211
+      },
+      {
+        "date": "2026-11-18",
+        "counterfactual": 187,
+        "true_effect": 8,
+        "treated_final": 195
+      },
+      {
+        "date": "2026-11-19",
+        "counterfactual": 187,
+        "true_effect": 8,
+        "treated_final": 195
+      },
+      {
+        "date": "2026-11-20",
+        "counterfactual": 199,
+        "true_effect": 8,
+        "treated_final": 207
+      },
+      {
+        "date": "2026-11-21",
+        "counterfactual": 189,
+        "true_effect": 8,
+        "treated_final": 197
+      },
+      {
+        "date": "2026-11-22",
+        "counterfactual": 168,
+        "true_effect": 8,
+        "treated_final": 176
+      },
+      {
+        "date": "2026-11-23",
+        "counterfactual": 158,
+        "true_effect": 8,
+        "treated_final": 166
+      },
+      {
+        "date": "2026-11-24",
+        "counterfactual": 170,
+        "true_effect": 8,
+        "treated_final": 178
+      }
+    ]
+  }
+}

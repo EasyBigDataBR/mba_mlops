@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "provenance": {
+    "execution_environment": "LOCAL Python CPU — não executado no Databricks",
+    "data_kind": "SYNTHETIC_DEMONSTRATION",
+    "executed_at_utc": "2026-11-25T11:14:34.138258+00:00",
+    "case": "initial",
+    "input_files": [
+      "01_base_pre_01.csv",
+      "02_base_pre_02.csv",
+      "03_base_pre_03.csv",
+      "04_base_pre_04.csv",
+      "05_base_pos_01.csv"
+    ],
+    "source_sha256": "da773bcf98666acf2996a16af7fbc9d7a1e84ad1e9e9aac6d88f84d36511951c"
+  },
+  "checks": {
+    "json_without_nan": true,
+    "effect_equals_observed_minus_counterfactual": true,
+    "cumulative_mean_equals_sum_of_effects": true,
+    "last_cumulative_interval_matches_google_summary": true,
+    "intervals_ordered": true,
+    "pre_accumulation_is_null": true,
+    "cumulative_lower_minus_sum_daily_lower": 389.41354769285283,
+    "cumulative_upper_minus_sum_daily_upper": -392.3876515803089,
+    "placebo_uses_only_pre_70_plus_14": true,
+    "post_outcome_masking": {
+      "passed": true,
+      "post_outcome_added_each_day": 17,
+      "max_counterfactual_difference": 0.0,
+      "expected_cumulative_effect_difference": 238
+    }
+  },
+  "dependencies": {
+    "python": "3.12.14",
+    "tfp-causalimpact": "0.2.0",
+    "tensorflow": "2.18.1",
+    "tensorflow-probability": "0.25.0",
+    "tf-keras": "2.18.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scipy": "1.14.1",
+    "altair": "5.5.0"
+  },
+  "elapsed_seconds": 13.961814215999766
+}

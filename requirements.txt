@@ -1,0 +1,11 @@
+# Combinação executada localmente em Python 3.12 / CPU.
+# Não instalar PySpark nem substituir o MLflow fornecido pelo Databricks.
+tfp-causalimpact==0.2.0
+tensorflow==2.18.1
+tensorflow-probability==0.25.0
+tf-keras==2.18.0
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.14.1
+altair==5.5.0
+matplotlib==3.9.4

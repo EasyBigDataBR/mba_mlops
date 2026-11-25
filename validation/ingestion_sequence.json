@@ -1,0 +1,358 @@
+{
+  "schema_version": "1.0.0",
+  "status": "PASS",
+  "generated_at_utc": "2026-11-25T11:21:30.517470+00:00",
+  "execution_environment": "LOCAL_PYTHON",
+  "synthetic": true,
+  "cloud_execution_performed": false,
+  "spark_or_delta_execution_performed": false,
+  "mlflow_workspace_or_job_execution_performed": false,
+  "scope": "Pure pandas ingestion planning, local unit tests and Python syntax compilation. No notebook cells or cloud operations were executed.",
+  "python_version": "3.12.14",
+  "pandas_version": "2.2.3",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "dataset_id": "synthetic_campaign_v1_2026-11-24_seed_20261125",
+  "manifest_sha256": "40825f7b6f917e729752851f98e5349433351de8baa5c1147e99980baa2a824f",
+  "source_sha256": {
+    "src/data_pipeline.py": "e58e73d9f0ad53ddf70ea105f564eb4ce652972fbc3a52db611332b32b620ca0",
+    "src/generate_demo_data.py": "eeced75dc741d1dadd74809c719c9c6ee0657275d8ee5e67895bde4e53829387",
+    "src/databricks_runtime.py": "5df5771ccd6b592c6d106e99c627823be76b2399d5da8e64955a23abb7c2c41a",
+    "tests/test_causal_model.py": "a103996a126cefcc2d32b6480d4d89e1def839eab3acc92effb25fb88d11bb11",
+    "tests/test_data_pipeline.py": "3591f1345012b267c1e31e82d6b9a0c8a210ecfeef2cb7c81a16a0644b6948f3",
+    "tests/test_runtime_contracts.py": "c6712219add60959de855a4e0696989c2f2aef15543ffc410d351910fb278554"
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "new_files": [
+        "01_base_pre_01.csv",
+        "02_base_pre_02.csv",
+        "03_base_pre_03.csv",
+        "04_base_pre_04.csv",
+        "05_base_pos_01.csv"
+      ],
+      "cumulative_file_count": 5,
+      "status": "READY",
+      "candidate_row_count": 98,
+      "as_of": "2026-11-03",
+      "snapshot_id": "122f99329ac1c37b6921420ec650d512dd8e9e9c1ac6f22a6011f4af7854dd88",
+      "publishable": true,
+      "candidate_only": false,
+      "accepted_file_count": 5,
+      "rejected_file_count": 0,
+      "superseded_file_count": 0,
+      "historical_validation_rejections": 0,
+      "rejected_events": [],
+      "superseded_events": [],
+      "treated_total": 17756,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    },
+    {
+      "run_number": 2,
+      "new_files": [
+        "06_append_pos_02.csv"
+      ],
+      "cumulative_file_count": 6,
+      "status": "READY",
+      "candidate_row_count": 105,
+      "as_of": "2026-11-10",
+      "snapshot_id": "e852101e1cb5e2cb62c60f640940472b0d1983ccd7ec7a88655681c6c34f95cf",
+      "publishable": true,
+      "candidate_only": false,
+      "accepted_file_count": 6,
+      "rejected_file_count": 0,
+      "superseded_file_count": 0,
+      "historical_validation_rejections": 0,
+      "rejected_events": [],
+      "superseded_events": [],
+      "treated_total": 19286,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    },
+    {
+      "run_number": 3,
+      "new_files": [
+        "07_append_pos_03_invalido.csv"
+      ],
+      "cumulative_file_count": 7,
+      "status": "BLOCKED",
+      "candidate_row_count": 105,
+      "as_of": "2026-11-10",
+      "snapshot_id": "e852101e1cb5e2cb62c60f640940472b0d1983ccd7ec7a88655681c6c34f95cf",
+      "publishable": false,
+      "candidate_only": true,
+      "accepted_file_count": 6,
+      "rejected_file_count": 1,
+      "superseded_file_count": 0,
+      "historical_validation_rejections": 1,
+      "rejected_events": [
+        {
+          "filename": "07_append_pos_03_invalido.csv",
+          "sha256": "b1f9db8fd75cfe7fde4af6e29abddd8565f107e81f43f3d081b8595c9a180946",
+          "batch_number": 7,
+          "source_revision": 1,
+          "status": "REJECTED",
+          "validation_status": "REJECTED",
+          "row_count": 7,
+          "errors": [
+            "LINE_5:control_a:MISSING"
+          ],
+          "superseded_by": null
+        }
+      ],
+      "superseded_events": [],
+      "treated_total": 19286,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    },
+    {
+      "run_number": 4,
+      "new_files": [
+        "08_correction_pos_03.csv"
+      ],
+      "cumulative_file_count": 8,
+      "status": "READY",
+      "candidate_row_count": 112,
+      "as_of": "2026-11-17",
+      "snapshot_id": "a04051d3f883def801599b93876216cf0045c18054705450e5353545213bcdfb",
+      "publishable": true,
+      "candidate_only": false,
+      "accepted_file_count": 7,
+      "rejected_file_count": 0,
+      "superseded_file_count": 1,
+      "historical_validation_rejections": 1,
+      "rejected_events": [],
+      "superseded_events": [
+        {
+          "filename": "07_append_pos_03_invalido.csv",
+          "sha256": "b1f9db8fd75cfe7fde4af6e29abddd8565f107e81f43f3d081b8595c9a180946",
+          "batch_number": 7,
+          "source_revision": 1,
+          "status": "SUPERSEDED",
+          "validation_status": "REJECTED",
+          "row_count": 7,
+          "errors": [
+            "LINE_5:control_a:MISSING"
+          ],
+          "superseded_by": "08_correction_pos_03.csv"
+        }
+      ],
+      "treated_total": 20807,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    },
+    {
+      "run_number": 5,
+      "new_files": [
+        "09_append_pos_04_efeito_atenuado.csv"
+      ],
+      "cumulative_file_count": 9,
+      "status": "READY",
+      "candidate_row_count": 119,
+      "as_of": "2026-11-24",
+      "snapshot_id": "6da09b33b3e4dfbb5763a39fd0554fb4b08a847ed9782e5b6a16cd04bad911a2",
+      "publishable": true,
+      "candidate_only": false,
+      "accepted_file_count": 8,
+      "rejected_file_count": 0,
+      "superseded_file_count": 1,
+      "historical_validation_rejections": 1,
+      "rejected_events": [],
+      "superseded_events": [
+        {
+          "filename": "07_append_pos_03_invalido.csv",
+          "sha256": "b1f9db8fd75cfe7fde4af6e29abddd8565f107e81f43f3d081b8595c9a180946",
+          "batch_number": 7,
+          "source_revision": 1,
+          "status": "SUPERSEDED",
+          "validation_status": "REJECTED",
+          "row_count": 7,
+          "errors": [
+            "LINE_5:control_a:MISSING"
+          ],
+          "superseded_by": "08_correction_pos_03.csv"
+        }
+      ],
+      "treated_total": 22121,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    },
+    {
+      "run_number": 6,
+      "new_files": [
+        "10_correction_dia_anterior.csv"
+      ],
+      "cumulative_file_count": 10,
+      "status": "READY",
+      "candidate_row_count": 119,
+      "as_of": "2026-11-24",
+      "snapshot_id": "162712e19ce53b68850323b0322f842d5f1087f0be0eeece5a2de6c58655a623",
+      "publishable": true,
+      "candidate_only": false,
+      "accepted_file_count": 9,
+      "rejected_file_count": 0,
+      "superseded_file_count": 1,
+      "historical_validation_rejections": 1,
+      "rejected_events": [],
+      "superseded_events": [
+        {
+          "filename": "07_append_pos_03_invalido.csv",
+          "sha256": "b1f9db8fd75cfe7fde4af6e29abddd8565f107e81f43f3d081b8595c9a180946",
+          "batch_number": 7,
+          "source_revision": 1,
+          "status": "SUPERSEDED",
+          "validation_status": "REJECTED",
+          "row_count": 7,
+          "errors": [
+            "LINE_5:control_a:MISSING"
+          ],
+          "superseded_by": "08_correction_pos_03.csv"
+        }
+      ],
+      "treated_total": 22133,
+      "matches_manifest_expected_snapshot": true,
+      "matches_runtime_python_hash": true,
+      "repeat_with_same_bytes_and_reversed_dictionary": {
+        "status": "PASS",
+        "unchanged": {
+          "status": true,
+          "snapshot_id": true,
+          "as_of": true,
+          "events": true,
+          "summary": true,
+          "data": true
+        }
+      }
+    }
+  ],
+  "cross_run_checks": {
+    "invalid_07_changes_no_candidate_data": true,
+    "valid_08_supersedes_07_and_preserves_original_errors": true,
+    "late_correction_changes_only_dates": [
+      "2026-10-26"
+    ],
+    "late_correction_treated_total_delta": 12,
+    "late_correction_preserves_119_unique_dates": true,
+    "late_correction_preserves_as_of": "2026-11-24",
+    "late_correction_preserves_entire_pre_period": true
+  },
+  "unit_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_*.py' -v",
+    "tests_run": 51,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "duration_seconds": 0.14273,
+    "includes_scientific_fit_rerun": false
+  },
+  "notebook_syntax": {
+    "status": "PASS",
+    "notebook_count": 6,
+    "method": "compile(source, relative_path, exec)",
+    "magic_cells_executed": false,
+    "spark_dbutils_names_resolved": false,
+    "notebooks": [
+      {
+        "path": "notebooks/00_Configurar.py",
+        "sha256": "6e4b36e09f22e5620ee7b2ab90910e5bf65d4d70c0c8dbfa8c52c5357b1b5830",
+        "syntax": "PASS",
+        "executed": false
+      },
+      {
+        "path": "notebooks/01_Ingerir_Atualizacoes.py",
+        "sha256": "36905556502a9107d607d453e0b03b9e1d58f2e1995385e1e3dbe523fb36f7e4",
+        "syntax": "PASS",
+        "executed": false
+      },
+      {
+        "path": "notebooks/02_Executar_CausalImpact.py",
+        "sha256": "88db47887238bccd5432c4e8cc6fa31f2052da61eac96d519ce1b6014779fd0a",
+        "syntax": "PASS",
+        "executed": false
+      },
+      {
+        "path": "notebooks/03_Painel_e_Validacao.py",
+        "sha256": "6f3fe3b065b0e8f3c9ad061aae6df199687d22eb7a09499b4f0efbb9d2a4f7cb",
+        "syntax": "PASS",
+        "executed": false
+      },
+      {
+        "path": "notebooks/04_Orquestrar.py",
+        "sha256": "5df95d1ca0b577c6cbcbea98d238c1e75d8d04bbc088b7033fe82d42c4c4beff",
+        "syntax": "PASS",
+        "executed": false
+      },
+      {
+        "path": "notebooks/05_Criar_Job.py",
+        "sha256": "3cb6cd4b2b42fa13dc66c3d58ba794589934fd351112ceb3723c25627475830d",
+        "syntax": "PASS",
+        "executed": false
+      }
+    ]
+  },
+  "replay_semantics": {
+    "same_cumulative_files_and_bytes": "same deterministic plan and snapshot_id; runtime owns persistence/reuse decisions",
+    "as_of": "event-time cutoff applied to the currently accepted snapshot, including later corrections",
+    "historical_revision": "recover the recorded snapshot_id; as_of alone does not restore pre-correction bytes"
+  }
+}

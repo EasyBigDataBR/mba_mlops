@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "execution_environment": "LOCAL pure Python/pandas; no Spark, MLflow or Databricks calls",
+  "executed_at_utc": "2026-11-25T11:21:22.987375+00:00",
+  "tests": 14,
+  "elapsed_seconds": 0.004,
+  "runtime_sha256": "5df5771ccd6b592c6d106e99c627823be76b2399d5da8e64955a23abb7c2c41a",
+  "tests_sha256": "c6712219add60959de855a4e0696989c2f2aef15543ffc410d351910fb278554",
+  "coverage": [
+    "Persisted intervals and all output values checked even when count and final cumulative mean match",
+    "Date uniqueness and full expected date set",
+    "PRE nulls versus unexpected nulls",
+    "Explicit numerical tolerance",
+    "Same-snapshot analysis error keeps previous valid label",
+    "New ingestion attempt remains pending until its analysis",
+    "NO_CHANGE for old snapshot is consistent when the operation-selected analysis matches",
+    "Missing stages and wrong analysis identity cannot mark CONSISTENT"
+  ],
+  "scope_limit": "Pure helpers executed; panel selection path reviewed statically, no Spark/cloud execution."
+}
