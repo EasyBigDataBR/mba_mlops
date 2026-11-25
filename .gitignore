@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.databrickscfg
+.databricks/
+.ipynb_checkpoints/
+mlruns/
+mlartifacts/
+data/raw/
+data/exports/
+artifacts/private/
+evidence/private/

@@ -1,0 +1,94 @@
+{
+  "project": "MBA - MLOps",
+  "execution_platform": "Databricks Free Edition",
+  "catalog": "mba",
+  "schema": "mlops_causalimpact",
+  "repository": "https://github.com/EasyBigDataBR/mba_mlops",
+  "observed_from_user_screenshot": {
+    "tables_with_full_names": [
+      "bronze_campanha",
+      "bronze_ingestion_control",
+      "feature_bh_counterfact",
+      "gold_causal_daily",
+      "gold_mlops_status",
+      "silver_campanha_daily"
+    ],
+    "table_with_truncated_name": {
+      "visible_prefix": "gold_campaign_m",
+      "full_name": null
+    },
+    "volumes": [
+      "landing"
+    ],
+    "functions": [
+      "bh_counterfactual_model"
+    ],
+    "models": [
+      "bh_counterfactual_model"
+    ]
+  },
+  "inspection_status": "PENDING_SOURCE_EXPORT",
+  "implementation": {
+    "requested_method": "CausalImpact",
+    "reference_python_distribution": "tfp-causalimpact",
+    "observed_distribution": null,
+    "observed_version": null
+  },
+  "temporal_policy": {
+    "timezone": "America/Sao_Paulo",
+    "default_requested_cutoff": "last_complete_calendar_day",
+    "effective_cutoff_requires_source_completeness": true,
+    "pre_period": "fixed_after_source_review",
+    "intervention": "fixed_after_source_review",
+    "controls": "fixed_after_source_review",
+    "future_dates": "reject",
+    "historical_replay": "explicit_cutoff"
+  },
+  "study_config": {
+    "metric": null,
+    "date_column": null,
+    "treated_series": null,
+    "control_columns": [],
+    "pre_start": null,
+    "pre_end": null,
+    "intervention_date": null,
+    "source_kind": null
+  },
+  "meetings": [
+    {
+      "number": 1,
+      "date": null,
+      "requested_cutoff": null,
+      "effective_cutoff": null,
+      "analysis_id": null
+    },
+    {
+      "number": 2,
+      "date": null,
+      "requested_cutoff": null,
+      "effective_cutoff": null,
+      "analysis_id": null
+    },
+    {
+      "number": 3,
+      "date": null,
+      "requested_cutoff": null,
+      "effective_cutoff": null,
+      "analysis_id": null
+    },
+    {
+      "number": 4,
+      "date": null,
+      "requested_cutoff": null,
+      "effective_cutoff": null,
+      "analysis_id": null
+    },
+    {
+      "number": 5,
+      "date": null,
+      "requested_cutoff": null,
+      "effective_cutoff": null,
+      "analysis_id": null
+    }
+  ]
+}
