@@ -29,6 +29,14 @@ A saída é um relatório JSON. Se uma consulta de metadados não estiver dispon
 
 O inventário é complementar. Para corrigir o modelo, continuamos precisando do código original.
 
+## Origem dos arquivos
+
+A entrada definida pelo usuário será a pasta **Dados_Campanhas_CausalImpact**. O volume de destino observado na imagem é `mba.mlops_causalimpact.landing`.
+
+A primeira integração proposta usa download do arquivo e upload pela interface do Databricks. A cópia no volume fica identificada pelo lote e hash; a transformação, análise e consulta continuam no Databricks.
+
+A leitura automática de uma pasta privada por API depende de autenticação e de acesso de rede permitido. Nenhuma conexão desse tipo foi configurada nesta revisão.
+
 ## Ordem de integração
 
 1. Identificar notebooks, arquivos de suporte, ambiente e tarefas existentes.
@@ -36,7 +44,7 @@ O inventário é complementar. Para corrigir o modelo, continuamos precisando do
 3. Ler a implementação de `bh_counterfactual_model`, incluindo a distribuição instalada e o tratamento pré/pós.
 4. Confirmar campanha, métrica, controles, data da intervenção e origem real ou sintética dos dados.
 5. Mapear a sequência existente para os cinco encontros.
-6. Ajustar o corte por encontro, a completude e a preservação do histórico.
+6. Mapear os arquivos de atualização do Drive para o volume e os contratos existentes; ajustar o corte por encontro, a completude e a preservação do histórico.
 7. Validar uma execução curta com dados do projeto, registrando as evidências.
 8. Validar a repetição manual por Job e o painel.
 9. Produzir os gráficos a partir dessas execuções identificadas.

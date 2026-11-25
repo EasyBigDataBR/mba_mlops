@@ -13,11 +13,21 @@ Esta branch contém a preparação editorial e o inventário para integrar o pro
 | Roteiro dos cinco encontros | Proposta editorial neste repositório |
 | Política de atualização por encontro | Especificada; depende do contrato real dos dados |
 | Notebook de inventário | Preparado para leitura de metadados; ainda não executado no workspace |
+| Pasta Drive para atualização das campanhas | Criada; aguardando os arquivos de entrada |
+| Transferência Drive → Databricks | Fluxo proposto; sincronização automática não configurada |
 | Código original do workspace | Aguardando importação |
 | Implementação de `bh_counterfactual_model` | Ainda não inspecionada |
 | Alterações e execução no Databricks | Não realizadas nesta revisão |
 | Cinco PPTX/PDF FGV IDE e apresentações online | Ainda não revisados para este case |
 | Resultados numéricos do novo case | Não produzidos nem validados nesta revisão |
+
+## Arquivos de atualização no Drive
+
+A pasta **Dados_Campanhas_CausalImpact** foi criada dentro da pasta do curso para receber os resultados observados das campanhas. Seu endereço será configurado no workspace e foi entregue ao usuário na conversa; ele não é publicado neste repositório.
+
+O fluxo proposto é: arquivo no Drive → cópia para `/Volumes/mba/mlops_causalimpact/landing/` → validação e ingestão no projeto → análise CausalImpact → painel. A primeira transferência prevista é manual, por download e upload no volume. A sincronização automática ainda não foi configurada ou testada.
+
+Cada arquivo deve identificar seu período e revisão. O contrato final será mapeado às colunas existentes após a leitura dos notebooks. [Veja o contrato e o procedimento](docs/05_arquivos_drive.md).
 
 ## A história dos encontros
 

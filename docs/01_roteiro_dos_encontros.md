@@ -7,6 +7,10 @@ Em cada apresentação, as posições **15 e 16** recebem, integralmente e nessa
 
 A história acompanha a mesma campanha: **dados diários, contrafactual, análise rastreável, atualização manual e painel**. **Em cada encontro, conferimos o corte; ele avança se houver novos dias completos.** Depois de conferidos no projeto real, o período pré, a data da intervenção e os controles permanecem fixos.
 
+### Origem dos arquivos
+
+Os arquivos de atualização dos resultados observados das campanhas ficam na pasta preparada no Drive. A execução continua no Databricks Free. A primeira transferência proposta é manual para o volume `landing`; o código de ingestão e o contrato final dependem da leitura do projeto existente.
+
 ### Base confirmada e pontos a conferir
 
 Os seguintes nomes aparecem na captura do workspace:
@@ -42,7 +46,7 @@ A orientação metodológica considera controles não afetados pela intervençã
 | 6 | DevOps: colaboração na entrega | Código e operação precisam acompanhar a mesma mudança. | **Diagrama infinito DevOps preservado**, com elementos editáveis. | [MLOps][mlops] | Observar como essa colaboração se aplica aos dados. |
 | 7 | DataOps: dados utilizáveis | Cada atualização precisa chegar com formato, qualidade e origem conhecidos. | **Diagrama infinito DataOps preservado**, com elementos editáveis. | [MLOps][mlops] | Conectar os dados à análise baseada em modelo. |
 | 8 | MLOps: análise em operação | O resultado precisa ser repetível, rastreável e acompanhado. | **Diagrama infinito MLOps preservado**, com elementos editáveis. | [MLOps][mlops] | Localizar essas responsabilidades no projeto. |
-| 9 | O fluxo que vamos conferir | O código deve explicar como a entrada chega às séries e aos resultados. | Fluxo proposto: entrada, preparação, análise e saída. Relações reais só após leitura do código. | [Notebooks][notebooks] | Definir o corte da execução. |
+| 9 | Do arquivo à análise | Receba o arquivo no Drive e leve a cópia identificada para o Databricks. | Drive, volume landing e análise. A transferência inicial é manual; relações entre tabelas serão confirmadas no código. | [Volumes][volumes], [Drive API][drive] | Definir o corte da execução. |
 | 10 | O corte do encontro | Use o último dia completo no fuso America/Sao_Paulo e registre a data. | Relógio e calendário, com campo para o corte efetivamente conferido. | [SQL][sql] | Separar o corte variável do desenho fixo. |
 | 11 | O que fica fixo no estudo | Após conferir o desenho, preserve o pré, a intervenção e os controles. | Linha do tempo sem datas inventadas; o pós termina no corte do encontro. | [Guia do método][design] | Conferir a atualização da base. |
 | 12 | Leitura da base do corte | Compare o corte atual com o anterior e identifique se há dias completos acrescentados. | Saída real de uma consulta de cobertura, preparada após acesso ao projeto. | [Histórico Delta][history] | Registrar a evidência da atualização ou da manutenção do corte. |
@@ -102,7 +106,7 @@ A orientação metodológica considera controles não afetados pela intervençã
 | 8 | Versões comparáveis | Mudanças no corte ou na configuração precisam aparecer no contexto do resultado. | Dois registros lado a lado, sem efeitos numéricos inventados. | [MLflow][tracking] | Investigar o comportamento de uma repetição. |
 | 9 | Repetição do mesmo corte | Verifique se repetir a execução evita dados e resultados duplicados. | Fluxo com decisão entre reutilizar e produzir uma nova saída. | [Tabelas Delta][delta] | Conferir a origem dos números persistidos. |
 | 10 | Origem de um número | Confira se gold_causal_daily liga seus números ao corte e à origem. | Mapa dos campos reais da tabela, construído após a inspeção. | [Tabelas Delta][delta] | Examinar o controle de entrada. |
-| 11 | Controle de ingestão | Inspecione bronze_ingestion_control e confirme sua regra de atualização. | Registro real da ingestão e suas chaves, quando disponíveis. | [Tabelas Delta][delta] | Conferir se as evidências podem ser recuperadas. |
+| 11 | Controle de ingestão | Confira como bronze_ingestion_control identifica o arquivo e evita repetir o lote. | Arquivo, revisão e hash ligados ao registro real, após conferir e ajustar o contrato. | [Tabelas Delta][delta], [Volumes][volumes] | Conferir se as evidências podem ser recuperadas. |
 | 12 | Evidência recuperável | Abra os dados e artefatos referidos pela análise que você escolheu. | Demonstração guiada com referências reais. | [MLflow][tracking] | Consolidar a entrega do encontro. |
 | 13 | Entrega do terceiro encontro | Explique um resultado usando seu corte, seus dados e sua configuração. | Roteiro visual de uma explicação curta. | [MLOps][mlops] | Preparar a repetição operacional. |
 | 14 | Referências e próximo passo | O próximo passo é repetir a atualização preservando esse contexto. | Links para rastreamento, histórico e Jobs. | [MLflow][tracking], [Histórico][history], [Jobs][jobs] | Encontro 4: atualização manual. |
@@ -122,7 +126,7 @@ A orientação metodológica considera controles não afetados pela intervençã
 | Slide | Título | Frase curta para o aluno | Visual proposto | URL oficial | Continuidade |
 |---|---|---|---|---|---|
 | 1 | Atualização manual | Vamos repetir a análise com contexto preservado e novos dias, quando disponíveis. | Fluxo curto da conferência do corte ao resultado. | [Jobs][jobs] | Conferir a base que será usada. |
-| 2 | O corte desta execução | Confira a data de corte e a cobertura da base antes de executar. | Calendário e resultado real da consulta de cobertura. | [SQL][sql] | Localizar o notebook responsável pela operação. |
+| 2 | O arquivo desta execução | Confira o arquivo da campanha no volume e o último dia completo que ele cobre. | Download do Drive, upload no volume e conferência do período; sem presumir sincronização automática. | [Volumes][volumes] | Localizar o notebook responsável pela operação. |
 | 3 | A tarefa do notebook | Identifique o notebook auditado que prepara os dados e atualiza a análise. | Entrada, processamento e saída, com nomes preenchidos após a leitura do código. | [Notebooks][notebooks] | Separar novos dados de mudanças no desenho. |
 | 4 | Novos dias, mesmo desenho | O pós cresce enquanto o pré, a intervenção e os controles permanecem fixos. | Linha do tempo com extensão apenas do período posterior. | [Guia do método][design] | Conferir os efeitos de uma repetição. |
 | 5 | Atualização sem duplicatas | As chaves e as regras de escrita precisam permitir uma repetição segura. | Chaves de escrita e decisão de atualização, conforme a implementação real. | [Tabelas Delta][delta] | Definir a execução manual. |
@@ -225,3 +229,6 @@ Este documento é conteúdo editorial proposto. A montagem e a validação das a
 [sql]: https://docs.databricks.com/aws/en/sql/language-manual/
 [free]: https://docs.databricks.com/aws/en/getting-started/free-edition-limitations
 [fgvide]: https://educacao-executiva.fgv.br/
+
+[volumes]: https://docs.databricks.com/aws/en/volumes/volume-files
+[drive]: https://developers.google.com/workspace/drive/api/guides/manage-downloads

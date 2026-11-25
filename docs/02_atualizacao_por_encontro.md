@@ -19,6 +19,14 @@ Este documento define o comportamento desejado. A implementação será ajustada
 
 Não deslocamos a campanha no calendário para que ela pareça recente. Se a base for histórica, usamos cortes históricos explícitos. Se for sintética, identificamos a simulação e garantimos que acrescentar dias não altere silenciosamente o passado.
 
+## Como o arquivo chega à análise
+
+Os resultados observados das campanhas serão recebidos na pasta do Drive definida para o curso. Para a primeira versão do curso, o arquivo é baixado e enviado ao volume `mba.mlops_causalimpact.landing`. O notebook existente será ajustado para validar e processar o lote, depois da inspeção de seu código.
+
+Um arquivo de atualização contém observações da campanha e dos controles necessários. Contrafactuais e efeitos calculados pelo modelo são saídas da análise; não devem voltar como observações de entrada.
+
+O detalhe de nome, revisão, checksum e completude está no [contrato dos arquivos](05_arquivos_drive.md).
+
 ## Como escolher o corte
 
 1. Calcule o último dia completo no fuso `America/Sao_Paulo`.

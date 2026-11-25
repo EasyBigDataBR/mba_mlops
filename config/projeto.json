@@ -90,5 +90,23 @@
       "effective_cutoff": null,
       "analysis_id": null
     }
-  ]
+  ],
+  "data_source": {
+    "provider": "Google Drive",
+    "role": "arquivos de resultados observados das campanhas",
+    "folder_id": null,
+    "folder_url": null,
+    "preferred_file_format": "CSV UTF-8",
+    "contract_status": "PENDING_MAPPING_TO_EXISTING_SCHEMA",
+    "landing_volume": "mba.mlops_causalimpact.landing",
+    "landing_path": "/Volumes/mba/mlops_causalimpact/landing/",
+    "transfer_plan": "manual_download_and_upload_to_volume",
+    "automatic_sync_implemented": false,
+    "ingestion_implemented_in_this_revision": false,
+    "outcome_semantics": "observed_campaign_results_not_model_predictions",
+    "native_connector_availability_in_user_workspace": "NOT_VERIFIED",
+    "optional_managed_authentication": "OAuth U2M: Databricks-managed, only if enabled",
+    "folder_display_name": "Dados_Campanhas_CausalImpact",
+    "folder_configuration": "Definir o ID/URL somente na configuração do workspace, fora do repositório público."
+  }
 }
