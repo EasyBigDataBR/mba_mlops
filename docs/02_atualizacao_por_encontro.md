@@ -62,7 +62,7 @@ Se dois encontros usarem exatamente o mesmo corte e os mesmos dados, o curso exp
 - Resultado e intervalos produzidos pelo próprio método.
 - Estado da revisão e motivo de eventual bloqueio.
 
-Uma correção tardia nos dados gera uma nova versão identificada. A execução deve permitir comparar a revisão com a versão anterior.
+Uma correção tardia nos dados gera uma nova versão identificada. A execução deve permitir comparar a revisão com a versão anterior. Um corte igual não significa dados iguais: a reutilização exige a mesma identidade dos dados, configuração, código e ambiente, conforme a política implementada.
 
 ## Como ler o resultado
 

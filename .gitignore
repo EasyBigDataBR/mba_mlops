@@ -15,3 +15,5 @@ data/raw/
 data/exports/
 artifacts/private/
 evidence/private/
+config/local*.json
+manifests/private/

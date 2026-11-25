@@ -60,6 +60,16 @@ O nome ajuda a organizar; a validação usa o conteúdo e o controle de ingestã
 
 A documentação do conector gerenciado informa que, para formatos estruturados como CSV, a ingestão incremental incorpora novos arquivos e não captura edições em arquivos já ingeridos. Por isso, a proposta usa arquivos novos por lote ou revisão. [FAQ oficial](https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-drive-faq).
 
+## Totais, incrementos e identidade da observação
+
+Cada lote precisa declarar se traz **totais diários completos** ou **incrementos**. A regra será única e explícita para cada fonte. Um total diário corrigido substitui a revisão anterior na base usada pela análise; as duas versões continuam preservadas na origem.
+
+O hash identifica o conteúdo do arquivo. A chave lógica identifica a observação — por exemplo, série/grupo, data, métrica e campanha, quando aplicável ao contrato real. Dois arquivos com hashes diferentes podem repetir a mesma observação. Por isso, a ingestão verifica os dois níveis.
+
+A data de upload não prova que um dia está completo. Ausência de linha não equivale a zero. O corte precisa de observações finais do tratado e de todos os controles.
+
+Se uma correção mudar os valores do pré ou do pós já analisados, ela gera nova identificação dos dados e nova versão da análise. O mesmo `as_of` não autoriza reutilizar um resultado produzido com outro conteúdo, configuração ou código.
+
 ## Controle no projeto existente
 
 `bronze_ingestion_control` é o objeto existente que será inspecionado para mapear esse controle. Não será presumida a presença de colunas ou regras pelo nome da tabela.
@@ -89,7 +99,7 @@ O Databricks documenta um conector gerenciado de Google Drive e uma alternativa 
 
 Ainda não foi verificada a disponibilidade dessa opção na conta Free informada. A existência da documentação não prova que a conexão está habilitada nesse workspace. A automação também precisa ser testada com as permissões, a rede e as quotas disponíveis.
 
-Para manter a primeira versão do curso simples, o procedimento por upload no volume está documentado como ponto de partida. Uma integração nativa poderá substituir a transferência após a confirmação de suporte e autenticação, mantendo os mesmos contratos de lote, corte e análise.
+Para manter a primeira versão do curso simples, o procedimento por upload no volume está documentado como ponto de partida. Uma integração nativa poderá ser adotada após a confirmação de suporte e autenticação, mantendo os mesmos contratos de lote, corte e análise. O conector gerenciado ingere diretamente em tabelas Delta; não se presume que ele também grave os arquivos no volume landing. Essa rota precisará de um mapeamento explícito para as tabelas existentes.
 
 ## Relação com os encontros
 
@@ -102,3 +112,5 @@ Para manter a primeira versão do curso simples, o procedimento por upload no vo
 | 5 | Incorporar a atualização final e interpretar o painel |
 
 O calendário dos encontros e os períodos dos arquivos serão preenchidos com as datas reais do curso e da fonte.
+
+Manifestos operacionais com referências privadas, arquivos de campanha e saídas da análise ficam fora deste repositório público. O Git guarda o contrato e exemplos sanitizados.
