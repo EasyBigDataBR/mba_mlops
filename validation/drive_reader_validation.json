@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "executed_at_utc": "2026-11-25T12:00:03.229814+00:00",
+  "execution_environment": "LOCAL Python; no Spark, MLflow, Jobs or Databricks Drive calls",
+  "unit_tests": 68,
+  "failures": 0,
+  "errors": 0,
+  "elapsed_seconds": 0.136,
+  "notebooks_syntax_checked": [
+    "00_Configurar.py",
+    "01_Ingerir_Atualizacoes.py",
+    "02_Executar_CausalImpact.py",
+    "03_Painel_e_Validacao.py",
+    "04_Orquestrar.py",
+    "05_Criar_Job.py"
+  ],
+  "job_defaults_match_runtime": true,
+  "private_source_values_in_repo": false,
+  "runtime_sha256": "2000fbf8ed913e64b58c6fb4cce2a74078ab9786ed9e4424ccf7889c2ab0f85d",
+  "scope_limit": "Drive upload readback checked separately in private Drive; connection in Databricks requires authentication and smoke test."
+}

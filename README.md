@@ -1,20 +1,22 @@
 # CausalImpact no Databricks · demonstração de MLOps
 
-**Notebooks executáveis, dez arquivos de campanha e um Job manual.** Todo o processamento acontece no Databricks Free. O GitHub guarda o código; a pasta do Drive ou um Volume recebe os CSVs; Delta e MLflow guardam dados, análises e evidências.
+**Notebooks executáveis, dez arquivos de campanha e um Job manual.** Todo o processamento acontece no Databricks Free. O GitHub guarda o código; o Drive recebe os CSVs; o Job lê essa pasta a cada execução. Delta e MLflow guardam dados, análises e evidências.
 
 O modelo é a implementação Python do projeto Google: [`tfp-causalimpact==0.2.0`](https://github.com/google/tfp-causalimpact), API `causalimpact.fit_causalimpact`. Os dados são **sintéticos**, com um grupo tratado e dois controles. Este repositório é o projeto demonstrativo. As apresentações conceituais do curso ficam nos materiais PPTX/PDF.
 
 ## Comece por aqui
 
 1. Crie um **Git folder** no Databricks com `https://github.com/EasyBigDataBR/mba_mlops.git` e selecione **main**.
-2. Abra [00_Configurar](notebooks/00_Configurar.py), execute a célula de configuração e confira os widgets. O destino é `mba.mlops_causalimpact`; as novas tabelas começam com `ci_demo_`.
-3. Escolha a fonte. **Volume:** use `/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo`. **Drive:** informe a URL privada da pasta e uma conexão Unity Catalog autorizada, conforme o [guia de integração](docs/INTEGRACAO_DATABRICKS.md). A disponibilidade da conexão depende do workspace; não é necessário tornar a pasta pública.
-4. Coloque **somente os cinco primeiros CSVs** de [data_demo](data_demo/) na pasta de entrada. Preserve nomes e bytes. Não converta em planilhas nem use “Salvar como CSV” no Excel.
+2. Abra [00_Configurar](notebooks/00_Configurar.py) e preencha os widgets: `source_mode=drive`, `source_path` com a URL privada de **`01_Entrada_Databricks`** e `drive_connection` com a conexão Unity Catalog autorizada. Os dois últimos valores ficam vazios no Git e devem ser configurados no workspace. O destino é `mba.mlops_causalimpact`; as novas tabelas começam com `ci_demo_`.
+3. Confira as duas pastas irmãs no Drive: **`01_Entrada_Databricks`** contém os CSVs **01–05**; **`02_Reserva_Proximas_Execucoes`** contém **06–10**. O Job deve olhar apenas para a primeira. A leitura do Drive inclui subpastas: apontar para a pasta que contém as duas anteciparia todas as entregas. [Leitura oficial do Drive](https://docs.databricks.com/aws/en/ingestion/google-drive)
+4. Execute a preparação e o **teste de leitura de `00` antes do modelo**. Confira os cinco nomes iniciais, tamanhos e hashes. Preserve os CSVs originais de [data_demo](data_demo/): não renomeie, converta em planilhas ou salve novamente no Excel. O [guia de integração](docs/INTEGRACAO_DATABRICKS.md) explica conexão, permissões e o teste no Free.
 5. Execute [01_Ingerir_Atualizacoes](notebooks/01_Ingerir_Atualizacoes.py), [02_Executar_CausalImpact](notebooks/02_Executar_CausalImpact.py) e [03_Painel_e_Validacao](notebooks/03_Painel_e_Validacao.py). Confira os mesmos parâmetros nos notebooks. Antes do Run All em `02`/`04`, selecione **Standard versão 4 (Python 3.12)** no Environment; eles instalam as dependências na própria sessão. O template do Job já fixa essa base.
-6. Abra [05_Criar_Job](notebooks/05_Criar_Job.py), confira os parâmetros da fonte e execute. Ele cria o Job manual que chama [04_Orquestrar](notebooks/04_Orquestrar.py). Não inicia uma run.
-7. Acrescente o arquivo **06** e clique em **Run now**. Continue com **07, 08, 09 e 10**, sempre um arquivo novo por execução. O erro no ciclo do `07` é esperado; ele faz parte da demonstração.
+6. Abra [05_Criar_Job](notebooks/05_Criar_Job.py), informe os mesmos parâmetros privados e execute. Ele cria o Job manual que chama [04_Orquestrar](notebooks/04_Orquestrar.py), ou atualiza a definição do Job identificado deste demonstrador. Não inicia uma run.
+7. **Mova** o arquivo **06** da reserva para `01_Entrada_Databricks` e clique em **Run now** no Job. Continue com **07, 08, 09 e 10**, um por execução. **Não é preciso editar o Job nem executar `05` a cada arquivo.** O erro no ciclo do `07` é esperado; ele faz parte da demonstração.
 
 Os `.py` em `notebooks/` têm o cabeçalho e os separadores nativos do Databricks: abrem como notebooks dentro do Git folder. Não importe apenas um arquivo isolado, pois eles usam os módulos em `src/`.
+
+**Preciso copiar os CSVs para um Volume? Não, no fluxo Drive.** A leitura usa a conexão autorizada e os bytes recebidos ficam na tabela Delta `ci_demo_bronze`, com seus hashes. Isso preserva a entrada para auditoria sem manter uma segunda pasta de CSVs. No modo Drive, o setup não cria Volume. `source_mode=volume` permanece como alternativa explícita no [guia](docs/INTEGRACAO_DATABRICKS.md), caso a integração Drive não esteja disponível na conta.
 
 ## A sequência dos arquivos
 
@@ -29,13 +31,13 @@ Os `.py` em `notebooks/` têm o cabeçalho e os separadores nativos do Databrick
 
 As datas foram ancoradas no último dia completo de **24/11/2026**, em `America/Sao_Paulo`. O pré é fixo: **29/07 a 20/10/2026**; a intervenção começa em **21/10/2026**. `as_of` vazio acompanha o último dia completo disponível nos arquivos, e não o relógio da aula. As entregas são congeladas para que cada execução seja comparável.
 
-Mantenha os arquivos anteriores na fonte. O `max_files_per_run=10` limita o **total de CSVs presentes**; não o diminua para 1 quando for acrescentar só um arquivo. Repetir os mesmos dados, código, configuração e dependências reutiliza a análise já publicada.
+Mantenha os arquivos anteriores em `01_Entrada_Databricks`. O `max_files_per_run=10` limita o **total de CSVs presentes**; não o diminua para 1 quando for acrescentar só um arquivo. Para este conjunto pequeno, cada execução relê os arquivos disponíveis e recalcula seus hashes. O controle identifica as entregas e a persistência evita duplicação. Repetir os mesmos dados, código, configuração e dependências reutiliza a análise já publicada. Este fluxo não usa Auto Loader nem promete baixar apenas o arquivo novo.
 
 ## Notebooks e apoio
 
 | Arquivo | Finalidade |
 | --- | --- |
-| [00_Configurar.py](notebooks/00_Configurar.py) | Preparar os objetos exclusivos do exemplo e conferir parâmetros. |
+| [00_Configurar.py](notebooks/00_Configurar.py) | Preparar os objetos exclusivos do exemplo, conferir parâmetros e testar a leitura antes do modelo. |
 | [01_Ingerir_Atualizacoes.py](notebooks/01_Ingerir_Atualizacoes.py) | Ler arquivos, validar contrato, registrar rejeições e aceitar snapshot. |
 | [02_Executar_CausalImpact.py](notebooks/02_Executar_CausalImpact.py) | Executar o modelo Google e registrar parâmetros, métricas e artefatos. |
 | [03_Painel_e_Validacao.py](notebooks/03_Painel_e_Validacao.py) | Consultar resultados, gráficos, histórico e integridade. |
@@ -44,7 +46,7 @@ Mantenha os arquivos anteriores na fonte. O `max_files_per_run=10` limita o **to
 | [jobs/job_template.json](jobs/job_template.json) | Definição de uma tarefa, Git `main`, Serverless Standard e execução manual. |
 | [sql/painel.sql](sql/painel.sql) | Consultas para explorar o histórico ou montar um dashboard. |
 | [docs/DEMONSTRACAO.md](docs/DEMONSTRACAO.md) | Roteiro de cada entrega, interpretação e recuperação. |
-| [docs/INTEGRACAO_DATABRICKS.md](docs/INTEGRACAO_DATABRICKS.md) | Git, dependências, Volume/Drive, permissões e Job. |
+| [docs/INTEGRACAO_DATABRICKS.md](docs/INTEGRACAO_DATABRICKS.md) | Git, Drive, dependências, permissões, Job e alternativa Volume. |
 
 O Job chama módulos Python na mesma sessão. Não há agenda, endpoint de serving ou cluster clássico. Os limites da conta Free continuam valendo.
 
@@ -77,6 +79,8 @@ O motor Google executou **localmente em CPU** nos cinco estados válidos. O cont
 | +10 | 29,50 | [25,45; 33,40] | 1.032,58 |
 
 Fonte: [resultados locais reproduzíveis](validation/local_results.json). São dados sintéticos, não resultados de uma campanha real. O [relatório do motor](validation/README_MODELO.md) inclui placebo, versões e comandos.
+
+A revisão do leitor Drive passou em **68 testes locais** e na conferência de sintaxe dos seis notebooks. O [relatório desta revisão](validation/drive_reader_validation.json) registra o escopo; ele não representa uma execução do conector no workspace.
 
 **Ainda não validado nesta entrega:** instalação na sua sessão serverless, conexão privada do Drive, escritas Delta, execução do Job e registro MLflow no seu workspace. O projeto está preparado para você integrar e executar; os resultados locais não são apresentados como uma run cloud.
 

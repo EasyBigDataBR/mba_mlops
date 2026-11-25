@@ -5,6 +5,7 @@ Execute: python -m unittest discover -s tests -p test_runtime_contracts.py -v
 """
 from copy import deepcopy
 from datetime import date, datetime
+import hashlib
 from pathlib import Path
 import sys
 import unittest
@@ -13,7 +14,10 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.databricks_runtime import panel_state, verify_effect_rows  # noqa: E402
+from src.databricks_runtime import (  # noqa: E402
+    DEFAULTS, DataGateError, describe_source_files, panel_state, source_files_from_rows,
+    source_metadata_index, validate_config, verify_effect_rows,
+)
 
 
 def effect_fixture():
@@ -141,6 +145,144 @@ class PanelStateTests(unittest.TestCase):
 
     def test_no_analysis_is_explicit(self):
         self.assertEqual(panel_state(self.ingest, self.model_attempt, None), "NO_ANALYSIS")
+
+
+class SourceDiscoveryTests(unittest.TestCase):
+    def setUp(self):
+        self.filename = "01_base_pre_01.csv"
+        self.payload = b"date,treated,control_a,control_b\n2026-07-29,10,20,30\n"
+        # ID fictício de fixture: nenhum identificador privado entra no teste.
+        self.drive_url = "https://drive.google.com/file/d/DEMO_FILE_A/view?usp=sharing"
+        self.row = {"filename": self.filename, "source_path": self.drive_url,
+                    "length": len(self.payload), "content": self.payload}
+
+    def receipt(self, name=None, payload=None):
+        return {"filename": name or self.filename,
+                "sha256": hashlib.sha256(self.payload if payload is None else payload).hexdigest()}
+
+    def test_drive_view_url_uses_selected_filename_metadata(self):
+        metadata = source_metadata_index([self.row], 10)
+        files, origins = source_files_from_rows([self.row], metadata)
+        self.assertEqual(files, {self.filename: self.payload})
+        self.assertEqual(origins, {self.filename: self.drive_url})
+        self.assertNotIn("view", files)
+
+    def test_filename_metadata_is_not_url_decoded(self):
+        row = {**self.row, "filename": "entrega%20literal.csv"}
+        files, _ = source_files_from_rows([row], source_metadata_index([row], 10))
+        self.assertIn("entrega%20literal.csv", files)
+        self.assertNotIn("entrega literal.csv", files)
+
+    def test_volume_path_is_preserved_as_origin(self):
+        row = {**self.row, "source_path": "dbfs:/Volumes/mba/mlops_causalimpact/landing/demo/01_base_pre_01.csv"}
+        files, origins = source_files_from_rows([row], source_metadata_index([row], 10))
+        self.assertEqual(files[self.filename], self.payload)
+        self.assertEqual(origins[self.filename], row["source_path"])
+
+    def test_duplicate_names_in_different_drive_files_are_blocked(self):
+        second = {**self.row, "source_path": "https://drive.google.com/file/d/DEMO_FILE_B/view"}
+        with self.assertRaisesRegex(DataGateError, "Nome de CSV repetido"):
+            source_metadata_index([self.row, second], 10)
+
+    def test_duplicate_origin_is_blocked_even_with_different_names(self):
+        second = {**self.row, "filename": "02_base_pre_02.csv"}
+        with self.assertRaisesRegex(DataGateError, "mesma origem"):
+            source_metadata_index([self.row, second], 10)
+
+    def test_missing_filename_never_falls_back_to_url(self):
+        missing = {key: value for key, value in self.row.items() if key != "filename"}
+        with self.assertRaisesRegex(DataGateError, "Metadados incompletos"):
+            source_metadata_index([missing], 10)
+
+    def test_metadata_limits_are_checked_before_content_collection(self):
+        for length in (-1, None, True, 1_000_001):
+            with self.subTest(length=length), self.assertRaises(DataGateError):
+                source_metadata_index([{**self.row, "length": length}], 10)
+        rows = [{"filename": f"{i:02d}.csv", "source_path": f"fixture://file/{i}", "length": 900_000}
+                for i in range(6)]
+        with self.assertRaisesRegex(DataGateError, "5 MB"):
+            source_metadata_index(rows, 10)
+        with self.assertRaisesRegex(DataGateError, "mais CSVs"):
+            source_metadata_index(rows, 5)
+
+    def test_changes_between_metadata_and_content_are_blocked(self):
+        metadata = source_metadata_index([self.row], 10)
+        cases = [[], [self.row, self.row],
+                 [{**self.row, "filename": "renamed.csv"}],
+                 [{**self.row, "source_path": "fixture://changed-origin"}],
+                 [{**self.row, "length": len(self.payload) + 1}],
+                 [{**self.row, "content": self.payload + b"x"}],
+                 [{**self.row, "content": None}]]
+        for rows in cases:
+            with self.subTest(rows=rows), self.assertRaises(DataGateError):
+                source_files_from_rows(rows, metadata)
+
+    def test_first_receipt_is_new_and_validation_remains_separate(self):
+        result = describe_source_files({self.filename: self.payload}, {self.filename: self.drive_url}, [])
+        self.assertEqual(result["new_file_count"], 1)
+        self.assertEqual(result["unchanged_file_count"], 0)
+        self.assertEqual(result["read_mode"], "BOUNDED_FULL_READ")
+        self.assertEqual(result["comparison_basis"], "BRONZE_FILENAME_SHA256")
+        self.assertTrue(result["validation_is_separate"])
+
+    def test_rejected_file_already_in_bronze_is_unchanged_on_retry(self):
+        name, payload = "07_append_pos_03_invalido.csv", b"fixture-rejected-by-data-contract"
+        known = [self.receipt(name, payload)]
+        # Ainda não consta em snapshot aceito, mas seus bytes já foram recebidos.
+        result = describe_source_files({name: payload}, {name: self.drive_url}, known, accepted_files={})
+        self.assertEqual(result["new_file_count"], 0)
+        self.assertEqual(result["unchanged_file_count"], 1)
+        self.assertEqual(result["files"][0]["status"], "UNCHANGED")
+        self.assertTrue(result["validation_is_separate"])
+
+    def test_added_file_is_new_and_existing_file_is_unchanged(self):
+        second = "06_append_pos_02.csv"
+        files = {self.filename: self.payload, second: b"next-delivery"}
+        origins = {self.filename: self.drive_url, second: "fixture://next-origin"}
+        accepted = {self.filename: self.receipt()["sha256"]}
+        result = describe_source_files(files, origins, [self.receipt()], accepted)
+        self.assertEqual(result["new_file_count"], 1)
+        self.assertEqual(result["unchanged_file_count"], 1)
+        self.assertEqual({x["filename"]: x["status"] for x in result["files"]},
+                         {self.filename: "UNCHANGED", second: "NEW"})
+
+    def test_same_hash_under_new_name_still_identifies_a_new_file(self):
+        name = "copy_with_other_name.csv"
+        result = describe_source_files({name: self.payload}, {name: "fixture://copy"}, [self.receipt()])
+        self.assertEqual(result["files"][0]["status"], "NEW")
+
+    def test_overwriting_accepted_bytes_is_blocked(self):
+        accepted = {self.filename: self.receipt()["sha256"]}
+        with self.assertRaisesRegex(DataGateError, "alteradas=.*01_base_pre_01.csv"):
+            describe_source_files({self.filename: self.payload + b"changed"},
+                                  {self.filename: self.drive_url}, [self.receipt()], accepted)
+
+    def test_removing_accepted_file_is_blocked(self):
+        accepted = {self.filename: self.receipt()["sha256"]}
+        with self.assertRaisesRegex(DataGateError, "Ausentes=.*01_base_pre_01.csv"):
+            describe_source_files({}, {}, [self.receipt()], accepted)
+
+
+class SourceConfigTests(unittest.TestCase):
+    def test_default_drive_requires_private_entry_folder_configuration(self):
+        self.assertEqual(DEFAULTS["source_mode"], "drive")
+        self.assertEqual(DEFAULTS["source_path"], "")
+        self.assertEqual(DEFAULTS["drive_connection"], "")
+        with self.assertRaisesRegex(ValueError, "subpasta Entrada.*Reserva"):
+            validate_config({})
+
+    def test_explicit_drive_configuration_is_accepted(self):
+        config = validate_config({"source_mode": "drive",
+                                  "source_path": "https://drive.google.com/drive/folders/DEMO_INPUT_FOLDER",
+                                  "drive_connection": "demo_drive_connection"})
+        self.assertEqual(config["source_mode"], "drive")
+        self.assertEqual(config["max_files_per_run"], 10)
+
+    def test_explicit_volume_configuration_still_works(self):
+        path = "/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo"
+        config = validate_config({"source_mode": "volume", "source_path": path})
+        self.assertEqual(config["source_mode"], "volume")
+        self.assertEqual(config["source_path"], path)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,21 @@
 # Dez entregas sintéticas de campanha
 
-Envie **01–05 juntos** à pasta de entrada. Depois, acrescente **06, 07, 08, 09 e 10**, um por execução. Mantenha os anteriores na pasta. Não renomeie, abra e salve ou converta os CSVs: os hashes validam os bytes originais.
+Os CSVs desta pasta são a distribuição do demonstrador. O Job lê a pasta configurada no **Drive**, não os arquivos que estão no Git.
+
+Na pasta do Drive, mantenha duas pastas irmãs:
+
+| Pasta | Começa com | O que fazer |
+| --- | --- | --- |
+| `01_Entrada_Databricks` | **01–05 juntos**. | Use a URL privada desta pasta em `source_path`. |
+| `02_Reserva_Proximas_Execucoes` | **06–10**. | Mova somente o próximo CSV para a entrada, um por demonstração. |
+
+Depois de mover **06**, clique em **Run now** no Job. Repita com **07, 08, 09 e 10**. Não é preciso editar a orquestração a cada arquivo. Mantenha os anteriores na entrada, inclusive o `07` quando chegar sua correção `08`.
+
+O leitor do Drive percorre subpastas: a reserva deve ficar **ao lado da entrada**, nunca dentro dela. O Job não deve apontar para a pasta que contém as duas. [Documentação oficial](https://docs.databricks.com/aws/en/ingestion/google-drive)
+
+Não renomeie, abra e salve ou converta os CSVs: os hashes validam os bytes originais. O notebook `00` testa a leitura antes do modelo. No modo Drive, não é necessário replicar em Volume: os bytes recebidos são preservados em `ci_demo_bronze`. A alternativa por Volume está no [guia de integração](../docs/INTEGRACAO_DATABRICKS.md).
+
+O limite `max_files_per_run=10` conta o total de CSVs na entrada. Cada execução relê e recalcula os hashes desse conjunto pequeno; os controles impedem duplicação. Não altere o limite para `1` ao acrescentar um arquivo.
 
 Os arquivos têm cabeçalho `date,treated,control_a,control_b`, UTF-8, separador vírgula e contagens inteiras de conversões diárias. `treated` é a série atingida pela campanha; os dois controles não são atingidos no cenário sintético. A chave é `date`.
 

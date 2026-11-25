@@ -13,7 +13,7 @@ import re
 import uuid
 from datetime import date, datetime, timezone
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -22,8 +22,8 @@ from src.data_pipeline import plan_snapshot
 OWNER = "causalimpact_demo_v1"
 DEFAULTS = {
     "catalog": "mba", "schema": "mlops_causalimpact",
-    "source_mode": "volume",
-    "source_path": "/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo",
+    "source_mode": "drive",
+    "source_path": "",
     "drive_connection": "", "as_of": "", "num_results": "300",
     "demo_id": "campanha_demo_v1", "max_files_per_run": "10",
     "experiment_path": "/Shared/MBA_CausalImpact_Demo",
@@ -93,7 +93,7 @@ def validate_config(raw):
     elif cfg["source_mode"] == "drive":
         url = urlparse(cfg["source_path"])
         if url.scheme != "https" or url.hostname != "drive.google.com" or "/folders/" not in url.path:
-            raise ValueError("No modo drive, source_path deve ser a URL HTTPS da pasta autorizada.")
+            raise ValueError("No modo drive, informe em source_path a URL HTTPS da subpasta Entrada autorizada, não da raiz que contém Reserva.")
         if not cfg["drive_connection"]:
             raise ValueError("Informe a conexão Unity Catalog em drive_connection.")
     else:
@@ -152,6 +152,88 @@ def panel_state(latest_ingest, latest_model_attempt, selected_analysis):
         or latest_ingest["snapshot_id"] != selected_analysis["snapshot_id"]):
         return "PREVIOUS_VALID_RESULT"
     return "CONSISTENT"
+
+
+def source_metadata_index(rows, max_files):
+    """Valida os metadados antes de trazer os bytes para Python.
+
+    filename vem de _metadata.file_name. source_path é a origem completa e
+    pode ser uma URL Drive terminada em /view; nunca se deriva o nome da URL.
+    """
+    if len(rows) > max_files:
+        raise DataGateError("Há mais CSVs do que o limite do demonstrador. Use uma pasta dedicada com até 10 arquivos.")
+    indexed, paths, total = {}, set(), 0
+    for row in rows:
+        try:
+            filename, source_path, length = row["filename"], row["source_path"], row["length"]
+        except (KeyError, TypeError) as error:
+            raise DataGateError("Metadados incompletos: selecione _metadata.file_name, path e length.") from error
+        if (not isinstance(filename, str) or not filename or not filename.endswith(".csv")
+            or any(char in filename for char in ("/", "\\", "\x00", "\n", "\r"))):
+            raise DataGateError("_metadata.file_name deve conter o nome completo de um CSV, sem diretórios.")
+        if not isinstance(source_path, str) or not source_path:
+            raise DataGateError("A origem completa do arquivo não foi informada nos metadados.")
+        if filename in indexed:
+            raise DataGateError(f"Nome de CSV repetido na origem ou em subpastas: {filename}. Mantenha nomes únicos.")
+        if source_path in paths:
+            raise DataGateError("A mesma origem foi listada mais de uma vez; interrompa e revise os metadados.")
+        if isinstance(length, bool) or not isinstance(length, int) or length < 0 or length > 1_000_000:
+            raise DataGateError("Fonte excede 1 MB por arquivo ou informou um tamanho inválido.")
+        indexed[filename] = {"source_path": source_path, "length": length}
+        paths.add(source_path)
+        total += length
+    if total > 5_000_000:
+        raise DataGateError("Fonte excede o limite didático de 5 MB no total.")
+    return indexed
+
+
+def source_files_from_rows(rows, metadata):
+    """Associa nome e bytes sem confundir uma URL com o nome do arquivo."""
+    files, origins = {}, {}
+    for row in rows:
+        filename = row["filename"]
+        if filename not in metadata or filename in files:
+            raise DataGateError("A lista de arquivos mudou durante a leitura ou contém nomes duplicados; tente novamente.")
+        expected = metadata[filename]
+        if row["source_path"] != expected["source_path"] or row["length"] != expected["length"]:
+            raise DataGateError("Nome, origem ou tamanho mudou entre a descoberta e a leitura; tente novamente.")
+        content = row["content"]
+        if not isinstance(content, (bytes, bytearray, memoryview)):
+            raise DataGateError(f"Conteúdo binário ausente ou inválido para {filename}.")
+        payload = bytes(content)
+        if len(payload) != expected["length"]:
+            raise DataGateError(f"Quantidade de bytes diverge dos metadados de {filename}; tente novamente.")
+        files[filename] = payload
+        origins[filename] = row["source_path"]
+    if set(files) != set(metadata):
+        raise DataGateError("Um arquivo desapareceu entre a descoberta e a leitura; tente novamente.")
+    return files, origins
+
+
+def describe_source_files(files, origins, received_rows, accepted_files=None):
+    """NEW/UNCHANGED usa o par nome+SHA já recebido na bronze, sem aprovar dados.
+
+    Os arquivos do último snapshot aceito continuam imutáveis. A releitura de
+    todos os arquivos limitados é intencional; não é transferência incremental.
+    """
+    if set(files) != set(origins):
+        raise DataGateError("Faltam metadados de origem para os arquivos recebidos.")
+    hashes = {name: hashlib.sha256(payload).hexdigest() for name, payload in files.items()}
+    accepted_files = accepted_files or {}
+    missing = sorted(set(accepted_files) - set(files))
+    changed = sorted(name for name in accepted_files if name in hashes and accepted_files[name] != hashes[name])
+    if missing or changed:
+        raise DataGateError(f"Não remova nem sobrescreva entregas já aceitas. Ausentes={missing}; alteradas={changed}. Correções chegam em arquivo novo.")
+    received = {(row["filename"], row["sha256"]) for row in received_rows}
+    details = [{"filename": name, "source_path": origins[name], "sha256": hashes[name],
+                "byte_count": len(files[name]),
+                "status": "UNCHANGED" if (name, hashes[name]) in received else "NEW"}
+               for name in sorted(files)]
+    new_count = sum(item["status"] == "NEW" for item in details)
+    return {"comparison_basis": "BRONZE_FILENAME_SHA256", "read_mode": "BOUNDED_FULL_READ",
+            "file_count": len(files), "total_bytes": sum(len(payload) for payload in files.values()),
+            "new_file_count": new_count, "unchanged_file_count": len(files) - new_count,
+            "validation_is_separate": True, "files": details}
 
 
 class DemoRuntime:
@@ -232,39 +314,44 @@ class DemoRuntime:
                "snapshot_id": snapshot_id, "analysis_id": analysis_id}
         self.insert_once("executions", [row], ["demo_id", "event_id"])
 
-    def read_source(self):
+    def read_source_bytes(self):
+        """Retorna (files, origins) lendo só a fonte; não consulta/escreve Delta."""
+        from pyspark.sql import functions as F
         reader = self.spark.read.format("binaryFile").option("pathGlobFilter", "*.csv")
         if self.cfg["source_mode"] == "drive":
-            reader = reader.option("databricks.connection", self.cfg["drive_connection"])
+            # No Drive a leitura é recursiva, inclusive se false for informado.
+            reader = (reader.option("databricks.connection", self.cfg["drive_connection"])
+                      .option("recursiveFileLookup", True))
         # Metadados primeiro: não trazer conteúdo ilimitado para a sessão Python.
-        raw = reader.load(self.cfg["source_path"])
-        metadata = raw.select("path", "length").limit(self.cfg["max_files_per_run"] + 1).collect()
-        if len(metadata) > self.cfg["max_files_per_run"]:
-            raise DataGateError("Há mais CSVs do que o limite do demonstrador. Use uma pasta dedicada com até 10 arquivos.")
-        if any(r["length"] > 1_000_000 for r in metadata) or sum(r["length"] for r in metadata) > 5_000_000:
-            raise DataGateError("Fonte excede o limite didático de 1 MB/arquivo e 5 MB no total.")
-        paths = {r["path"] for r in metadata}
+        # _metadata é oculto: selecionar o nome explicitamente na leitura.
+        # path permanece separado como origem; no Drive ele é uma URL completa.
+        raw = reader.load(self.cfg["source_path"]).select(
+            F.col("_metadata.file_name").alias("filename"),
+            F.col("path").alias("source_path"), "length", "content")
+        metadata_rows = raw.select("filename", "source_path", "length").limit(self.cfg["max_files_per_run"] + 1).collect()
+        metadata = source_metadata_index(metadata_rows, self.cfg["max_files_per_run"])
+        paths = [item["source_path"] for item in metadata.values()]
+        rows = (raw.where(F.col("source_path").isin(paths))
+                .select("filename", "source_path", "length", "content").collect()) if paths else []
+        return source_files_from_rows(rows, metadata)
+
+    def read_source(self):
+        """Preserva a interface {filename: bytes}; exige setup das tabelas demo."""
         from pyspark.sql import functions as F
-        rows = raw.where(F.col("path").isin(list(paths))).select("path", "content").collect() if paths else []
-        files = {}
-        for row in rows:
-            filename = unquote(row["path"].rstrip("/").rsplit("/", 1)[-1])
-            if filename in files:
-                raise DataGateError("Nomes de CSV repetidos em subpastas; mantenha a origem sem duplicatas.")
-            files[filename] = bytes(row["content"])
+        self._source_discovery = None
+        files, origins = self.read_source_bytes()
         previous = self.latest("snapshots")
-        if previous:
-            old_files = json.loads(previous["files_json"])
-            missing = sorted(set(old_files) - set(files))
-            changed = sorted(n for n in old_files if n in files and old_files[n] != hashlib.sha256(files[n]).hexdigest())
-            if missing or changed:
-                raise DataGateError(f"Não remova nem sobrescreva entregas já aceitas. Ausentes={missing}; alteradas={changed}. Correções chegam em arquivo novo.")
+        old_files = json.loads(previous["files_json"]) if previous else {}
+        received = (self.frame("bronze").where(F.col("filename").isin(list(files)))
+                    .select("filename", "sha256").distinct().collect()) if files else []
+        self._source_discovery = describe_source_files(files, origins, received, old_files)
         return files
 
     def ingest(self, attempt=None):
         attempt = attempt or uuid.uuid4().hex
         try:
             files = self.read_source()
+            discovery = self._source_discovery
             received = now()
             self.insert_once("bronze", [{"filename": n, "sha256": hashlib.sha256(b).hexdigest(),
                 "content": b, "byte_count": len(b), "received_at": received} for n, b in files.items()],
@@ -277,7 +364,7 @@ class DemoRuntime:
                        "superseded_by": e.get("superseded_by")} for e in plan["events"]]
             self.insert_once("ingestion_control", events, ["demo_id", "attempt_id", "filename", "sha256"])
             if plan["status"] != "READY":
-                self.event(attempt, "INGEST", plan["status"], dumps(plan["summary"]))
+                self.event(attempt, "INGEST", plan["status"], dumps({**plan["summary"], "discovery": discovery}))
                 raise DataGateError(f"Entrada {plan['status']}. Consulte ci_demo_ingestion_control. Nenhum novo snapshot/análise foi publicado.")
             data = plan["data"].copy()
             if self.cfg["as_of"]:
@@ -306,9 +393,12 @@ class DemoRuntime:
                     "row_count": len(data), "files_json": dumps({n: hashlib.sha256(b).hexdigest() for n, b in files.items()}),
                     "manifest_sha256": self.manifest_sha, "source_mode": self.cfg["source_mode"]}], ["demo_id", "snapshot_id"])
             status = "REUSED" if existing else "READY"
-            self.event(attempt, "INGEST", status, f"{len(data)} dias aceitos; corte {as_of}.", snapshot_id=snapshot)
+            self.event(attempt, "INGEST", status,
+                       dumps({"row_count": len(data), "as_of": as_of.isoformat(), "discovery": discovery}),
+                       snapshot_id=snapshot)
             return {"attempt_id": attempt, "status": status, "snapshot_id": snapshot,
-                    "as_of": as_of.isoformat(), "row_count": len(data), "events": plan["events"]}
+                    "as_of": as_of.isoformat(), "row_count": len(data), "events": plan["events"],
+                    "discovery": discovery}
         except DataGateError as error:
             last = self.latest("executions", stage="INGEST")
             if not last or last["attempt_id"] != attempt:

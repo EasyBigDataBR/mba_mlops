@@ -1,11 +1,10 @@
 {
   "status": "PASS",
   "execution_environment": "LOCAL pure Python/pandas; no Spark, MLflow or Databricks calls",
-  "executed_at_utc": "2026-11-25T11:21:22.987375+00:00",
-  "tests": 14,
-  "elapsed_seconds": 0.004,
-  "runtime_sha256": "5df5771ccd6b592c6d106e99c627823be76b2399d5da8e64955a23abb7c2c41a",
-  "tests_sha256": "c6712219add60959de855a4e0696989c2f2aef15543ffc410d351910fb278554",
+  "executed_at_utc": "2026-11-25T12:00:03.229593+00:00",
+  "tests": 31,
+  "runtime_sha256": "2000fbf8ed913e64b58c6fb4cce2a74078ab9786ed9e4424ccf7889c2ab0f85d",
+  "tests_sha256": "b7a844ccb982e9b2a19cb915475347222c8c18091f749d94bc2d2ec9fd518ce2",
   "coverage": [
     "Persisted intervals and all output values checked even when count and final cumulative mean match",
     "Date uniqueness and full expected date set",
@@ -14,7 +13,11 @@
     "Same-snapshot analysis error keeps previous valid label",
     "New ingestion attempt remains pending until its analysis",
     "NO_CHANGE for old snapshot is consistent when the operation-selected analysis matches",
-    "Missing stages and wrong analysis identity cannot mark CONSISTENT"
+    "Missing stages and wrong analysis identity cannot mark CONSISTENT",
+    "Drive filename from explicit _metadata.file_name; full path remains origin, including URLs ending /view",
+    "Duplicate names, source mutation between listing and content, file and total size limits",
+    "NEW/UNCHANGED based on previously received bronze filename and SHA256; validation remains separate",
+    "Accepted file removal or overwrite rejected; explicit Drive and Volume parameters"
   ],
-  "scope_limit": "Pure helpers executed; panel selection path reviewed statically, no Spark/cloud execution."
+  "scope_limit": "Pure helpers executed; Spark reader/projection and notebook source reviewed statically. No Databricks or Drive-connection execution."
 }

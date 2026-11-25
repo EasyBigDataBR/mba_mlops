@@ -1,6 +1,6 @@
 # Git, notebooks e Job manual no Databricks Free
 
-Use a branch `main` do repositório [`EasyBigDataBR/mba_mlops`](https://github.com/EasyBigDataBR/mba_mlops) e execute o case no Databricks Free. Os arquivos de entrada podem vir de um volume ou de uma conexão autorizada com o Drive. O código fica no Git; dados aceitos, auditoria e resultados ficam no Databricks.
+Use a branch `main` do repositório [`EasyBigDataBR/mba_mlops`](https://github.com/EasyBigDataBR/mba_mlops) e execute o case no Databricks Free. **O fluxo principal lê os CSVs diretamente do Drive por uma conexão Unity Catalog autorizada.** O código fica no Git; dados recebidos, auditoria e resultados ficam em Delta e MLflow no Databricks. Copiar CSVs para um Volume é uma alternativa, não uma exigência da integração.
 
 Este guia e o [template do Job](../jobs/job_template.json) foram conferidos com a documentação oficial em **25/11/2026**. A aceitação do Job, o acesso ao Drive e a execução completa nesta conta Free ainda precisam ser verificados no workspace. Validação local da biblioteca não comprova execução no Databricks.
 
@@ -8,12 +8,12 @@ Este guia e o [template do Job](../jobs/job_template.json) foram conferidos com 
 
 | Notebook | Quando usar |
 | --- | --- |
-| `00_Configurar.py` | Conferir ambiente, parâmetros e acesso aos objetos do case. |
+| `00_Configurar.py` | Conferir parâmetros, preparar os objetos e testar a leitura da fonte antes do modelo. |
 | `01_Ingerir_Atualizacoes.py` | Entender e executar a leitura dos arquivos e as validações da entrada. |
 | `02_Executar_CausalImpact.py` | Estimar o contrafactual para o corte aceito. |
 | `03_Painel_e_Validacao.py` | Conferir resultados, qualidade e rastreabilidade. |
 | `04_Orquestrar.py` | Executar o ciclo completo pelo Job manual. |
-| `05_Criar_Job.py` | Opcional: criar a definição do Job, sem iniciar uma execução. |
+| `05_Criar_Job.py` | Criar ou atualizar a definição do Job deste demonstrador, sem iniciar uma execução. |
 
 O Job tem **uma tarefa**, apontando para `04_Orquestrar.py`. Ela chama funções dos módulos em `src/` e mantém ingestão, análise e validação na mesma sessão. A falha de uma etapa deve interromper o ciclo e ficar registrada, sem publicar análise parcial.
 
@@ -45,15 +45,15 @@ A combinação TensorFlow/TFP/Keras precisa permanecer compatível. TensorFlow 2
 
 ## 4. Parâmetros do ciclo
 
-Os parâmetros do template estão no nível do Job e chegam automaticamente aos widgets da tarefa. Use **Run now with different parameters** para mudar apenas uma execução. [Parâmetros de Job][parameters]
+Os parâmetros do template estão no nível do Job e chegam automaticamente aos widgets da tarefa. **Preencha os valores privados uma vez no workspace e preserve-os no Job.** A chegada de outro CSV não exige mudar parâmetros. Use **Run now with different parameters** somente quando quiser mudar a configuração de uma execução. [Parâmetros de Job][parameters]
 
 | Parâmetro | Valor inicial | Uso |
 | --- | --- | --- |
 | `catalog` | `mba` | Catálogo dos objetos do case. |
 | `schema` | `mlops_causalimpact` | Schema do case. |
-| `source_mode` | `volume` | `volume` ou `drive`. |
-| `source_path` | `/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo` | Caminho absoluto da pasta de entrada; no modo Drive, URL informada somente na configuração privada. |
-| `drive_connection` | vazio | Nome da conexão Unity Catalog autorizada, somente para Drive. |
+| `source_mode` | `drive` | Fluxo principal; `volume` é uma alternativa explícita. |
+| `source_path` | vazio no Git | No workspace, informe a URL privada da pasta **`01_Entrada_Databricks`**, não a URL da pasta que contém entrada e reserva. |
+| `drive_connection` | vazio no Git | No workspace, informe o nome da conexão Unity Catalog autorizada para ler o Drive. |
 | `as_of` | vazio | Último dia completo presente na fonte validada; uma data ISO `AAAA-MM-DD` limita o corte do snapshot atual. |
 | `num_results` | `300` | Número de amostras posteriores da análise; não é limite de arquivos. |
 | `demo_id` | `campanha_demo_v1` | Identidade da demonstração. |
@@ -64,50 +64,68 @@ Com `as_of` vazio, o corte é o último dia completo **presente na fonte validad
 
 Informar uma data em `as_of` faz um **recorte temporal do snapshot atual**. Isso não recupera automaticamente os bytes de uma análise antiga: se o arquivo `10` corrigiu um dia anterior, o novo recorte contém essa correção. Para reproduzir a entrada e a configuração históricas, use o snapshot e os hashes originais, o commit, os parâmetros, a seed e as versões do ambiente daquela análise.
 
-### Volume: caminho inicial do exercício
+### Drive: organize a entrada e a reserva
 
-O volume `landing` precisa existir, com uma subpasta `causalimpact_demo`. A identidade que executa o Job deve conseguir ler os arquivos e gravar os resultados nas tabelas do case. Para o volume, confira `USE CATALOG`, `USE SCHEMA` e `READ VOLUME`; enviar arquivos também exige `WRITE VOLUME`. Criar um volume gerenciado exige `CREATE VOLUME` no schema. [Permissões de volumes][volume]
+Na pasta do Drive usada para a demonstração, mantenha estas duas **pastas irmãs**:
 
-### Drive: fonte opcional, com conexão e OAuth conferidos
+| Pasta | Conteúdo inicial | Uso pelo Job |
+| --- | --- | --- |
+| `01_Entrada_Databricks` | CSVs `01` a `05`. | É a única pasta apontada por `source_path`. |
+| `02_Reserva_Proximas_Execucoes` | CSVs `06` a `10`. | Guarda as próximas entregas, fora da árvore lida pelo Job. |
 
-Use `source_mode=drive` com uma **conexão Unity Catalog já autorizada** para a pasta ou prepare uma seguindo o [guia oficial de OAuth para SQL/Spark][drive]. Esse caminho exige conta com permissão para criar um projeto Google Cloud, habilitar a Drive API, configurar consentimento OAuth, credenciais de cliente e o callback do workspace; depois, crie a conexão no Databricks com escopo de leitura `drive.readonly`. O projeto serve à autorização da fonte; o processamento do case continua no Databricks.
+A leitura Spark do Drive percorre subpastas mesmo com `recursiveFileLookup=false`. O filtro `*.csv` seleciona nomes de arquivos, não pastas. Por isso, **não aponte para a pasta que contém entrada e reserva**, nem crie a reserva dentro da entrada. Depois do primeiro ciclo, mova um arquivo da reserva para a entrada e clique em **Run now**. Mantenha na entrada todos os arquivos já entregues. [Ingestão do Drive][drive]
 
-Confirme `USE CONNECTION` para a identidade do Job no acesso standard, acesso à pasta e suporte à integração, cujo requisito documentado é Runtime 17.3 ou superior. Fixar o Python pelo Environment 4 não comprova que o conector esteja habilitado. A disponibilidade no Free e a leitura desta pasta ainda não foram verificadas. O conector gerenciado tem configuração própria; não presuma que seu OAuth substitua a preparação exigida pela rota SQL/Spark.
+### Drive: autorize a conexão uma vez
 
-O leitor usa `binaryFile` para conferir o hash dos bytes originais antes de interpretar o CSV e registrar a entrada bronze. Se o conector ou o formato não forem aceitos pela conta, a etapa deve falhar explicitamente, sem trocar de fonte nem de formato em silêncio.
+Use uma **conexão Unity Catalog Google Drive existente**, com acesso à pasta, e informe seu nome em `drive_connection`. Na rota SQL/Spark, a documentação exige UC, Runtime 17.3 ou superior e os privilégios correspondentes: `USE CONNECTION` em acesso standard; `MANAGE CONNECTION` em dedicated. Criar uma conexão exige `CREATE CONNECTION`. Confira também as permissões da identidade que executará o Job, que pode diferir da sessão interativa. [Ingestão do Drive][drive]
 
-Informe URL e nome da conexão apenas nos parâmetros privados do Job. Não publique IDs, tokens ou segredos no Git. Se a conexão não estiver disponível no Free, baixe os CSVs autorizados, envie os mesmos bytes ao volume e selecione `source_mode=volume`; preserve nomes e hashes. Essa mudança é explícita e mantém a origem versionada sem exigir um pipeline adicional. [Ingestão do Drive][drive]
+Se precisar preparar uma conexão, o guia SQL/Spark documenta projeto Google Cloud com Drive API, consentimento OAuth, credenciais de cliente, callback do workspace e escopo `https://www.googleapis.com/auth/drive.readonly`. Esse projeto autoriza a fonte; todo o processamento do case permanece no Databricks. O conector gerenciado Lakeflow Connect também oferece OAuth **Databricks-managed**, sem projeto próprio, quando habilitado na conta. Este demonstrador usa Spark dentro do notebook, e a compatibilidade da conexão escolhida deve ser confirmada pelo teste de leitura. [OAuth e conexão][drive-connection]
 
-## 5. Crie um Job manual: escolha uma rota
+Free Edition usa serverless e tem restrições de saída à internet. A documentação não proíbe genericamente a integração Drive; a restrição explícita de conectores Lakeflow CDC refere-se aos que dependem de compute clássico. Isso também não garante que o recurso esteja disponível nesta conta. O Environment 4 define a API cliente e o ambiente Python; o servidor recebe atualizações independentes. **Confirme a leitura no workspace antes de iniciar o modelo.** [Limites Free][free] · [Versões serverless][environment-versions]
 
-### Rota A — Git folder e fonte WORKSPACE
+Informe a URL e o nome da conexão somente nos widgets e parâmetros privados do Job. Os campos vazios do repositório são intencionais: não publique IDs de pastas, URLs privadas, tokens ou credenciais no Git, nem torne a pasta pública para contornar a autorização.
 
-É a rota inicial para conferir o ambiente pela interface:
+### Teste de leitura antes de executar CausalImpact
 
-1. Abra **Jobs & Pipelines → Create → Job** e adicione uma tarefa **Notebook**.
-2. Escolha fonte **Workspace** e navegue até o notebook `04_Orquestrar` no Git folder. Use o seletor, sem inventar o caminho interno a partir do nome `.py` do Git.
-3. Selecione **Serverless**. Em **Environment and Libraries**, configure um **Jobs Environment** com **Standard versão 4**; se a interface usar o seletor antigo, escolha **Environment version 4**. Alternativamente, use **Notebook Environment** somente após conferir que o notebook já está em Standard versão 4. Inclua os parâmetros da tabela anterior.
-4. Mantenha execução manual, concorrência máxima `1`, fila desativada e tentativas adicionais `0`. Desative **Enable serverless auto-optimization**, que pode incluir novas tentativas.
-5. Se disponível, desligue **Performance optimized** para usar **Standard**. Ele prioriza menor consumo de DBUs, com inicialização potencialmente mais demorada.
-6. Salve o Job. Faça **Pull** no Git folder antes de executar uma versão nova do código.
+No `00_Configurar`, preencha os parâmetros, prepare as tabelas do exemplo e execute o teste de leitura. Na primeira demonstração, ele deve encontrar **exatamente os cinco CSVs iniciais**, com nomes e hashes iguais aos do [manifesto](../data_demo/manifest.json). O teste lê a fonte e confere os bytes; não ajusta o modelo nem publica um snapshot. Se falhar, resolva fonte, conexão, permissões ou arquivos antes de abrir `02`.
 
-### Rota B — Git remoto e template JSON
+O leitor usa `binaryFile`; primeiro limita a quantidade e os tamanhos, depois valida o conteúdo. Em Drive, `path` é uma URL, por isso o nome vem de `_metadata.file_name`. Uma consulta de metadados não comprova, por si só, ausência de I/O remoto. [Schemas do Drive][drive] · [Metadados de `read_files`][read-files]
 
-O arquivo [jobs/job_template.json](../jobs/job_template.json) é um corpo de criação para **Jobs API 2.2**. Ele configura a mesma tarefa, com fonte `GIT`, GitHub e branch `main`. O path é **`notebooks/04_Orquestrar.py`**, relativo ao repositório, com `.py` e sem `/` ou `./` no início. [Tarefa Notebook][notebook-task]
+São até **10 CSVs pequenos**, limitados a 1 MB por arquivo e 5 MB no conjunto. A cada run, o notebook relê a entrada e recalcula hashes; o manifesto e o histórico distinguem novas entregas, repetições e correções. A persistência é idempotente e a análise pode ser reutilizada. **Não há Auto Loader, cursor de arquivos ou promessa de baixar somente o CSV novo.**
 
-Na interface, escolha fonte **Git provider**, configure o repositório e a referência e use esse path. Para reproduzir uma versão, troque `git_branch` por `git_commit` com um SHA real revisado; não mantenha os dois campos. Cada run resolve um snapshot do código e mostra o SHA usado nos detalhes. O Pull do Git folder não controla essa rota. [Git em Jobs][git-jobs]
+### Preciso replicar a entrada em `/Volumes`?
 
-Se já usa a CLI autenticada, criar somente a definição é suficiente:
+**Não no modo Drive.** O notebook lê a fonte diretamente pela conexão e grava os bytes originais, hash e horário em `ci_demo_bronze`. Essa tabela Delta preserva a evidência recebida para auditoria; não é necessário manter outra pasta com cópias dos CSVs. O setup em modo Drive cria os objetos Delta do exemplo e **não cria Volume**. O Databricks documenta leitura direta com Spark/SQL e, em uma rota separada, ingestão gerenciada em tabelas Delta. [Leitura direta][drive] · [Conector gerenciado][drive-managed]
 
-```bash
-databricks jobs create --json @jobs/job_template.json
-```
+Se a conexão não estiver disponível no Free, use a alternativa explícita: envie os mesmos bytes para `/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo`, configure `source_mode=volume`, esse caminho em `source_path` e `drive_connection` vazio. O setup de `00` pode criar o Volume gerenciado `landing`, se não existir, e a subpasta. Para isso, precisa de `CREATE VOLUME` no schema; leitura exige `USE CATALOG`, `USE SCHEMA` e `READ VOLUME`, e envio exige `WRITE VOLUME`. Não há troca automática de fonte. [Permissões de volumes][volume]
 
-Esse comando não inicia o processamento. Não repita a criação para atualizar um Job existente: anote o ID retornado e edite aquela definição. O template não contém agenda, gatilho, cluster clássico ou destinatários. O timeout deve ser definido após medir uma execução representativa. [Criar e gerenciar Jobs][automate] · [Contrato da API][jobs-api]
+## 5. Crie o Job uma vez e execute quando chegar um arquivo
 
-O notebook opcional `05_Criar_Job.py` cria somente a definição. Se encontrar um Job com o mesmo nome e a tag `mba_mlops_demo=causalimpact_demo_v1`, reutiliza seu ID sem executar ou redefinir a configuração. Nesse caso, confira também o ambiente do Job existente: uma mudança no template Git não altera automaticamente a definição já criada.
+### Rota principal — notebook `05`, com código vindo do GitHub
 
-As duas rotas dependem das permissões e dos recursos disponíveis na conta. **Standard** e o ambiente selecionado devem ser conferidos na interface; não altere a conta para um plano pago para seguir este exercício. [Jobs serverless][serverless]
+Depois do teste de leitura e do primeiro ciclo, abra `05_Criar_Job.py` no Git folder. Preencha os mesmos parâmetros, incluindo os valores privados de `source_path` e `drive_connection`, e execute. O notebook aplica o [template](../jobs/job_template.json) ao Job **`MBA_MLOPS_CAUSALIMPACT_MANUAL`** e mostra seu link.
+
+O comportamento é explícito no [código de `05`](../notebooks/05_Criar_Job.py):
+
+- Se o Job não existir, cria a definição.
+- Se houver um único Job com o nome esperado e a tag `mba_mlops_demo=causalimpact_demo_v1`, **atualiza sua definição com `jobs/reset`**, preservando o ID. Usa o template atual e os parâmetros dos widgets; configurações editadas antes na interface podem ser substituídas.
+- Se houver mais de um Job com o nome, ou a identificação não corresponder, interrompe sem alterar aquele Job.
+
+**Criar ou atualizar a definição não inicia uma run.** Confira os parâmetros salvos, o ambiente Serverless/Standard e a credencial Git. Nos ciclos seguintes, mova o próximo CSV para a entrada e clique em **Run now**. Execute `05` novamente apenas quando quiser reaplicar uma configuração do Job; a chegada de arquivo não exige isso.
+
+A tarefa usa fonte `GIT`, repositório GitHub e branch `main`. O path é **`notebooks/04_Orquestrar.py`**, relativo ao repositório, com `.py` e sem `/` ou `./` no início. Cada run resolve um snapshot do código e mostra o SHA usado. O **Pull** do Git folder atualiza os notebooks interativos, mas não controla o Git remoto do Job. Para congelar uma versão do Job, substitua `git_branch` por `git_commit` com um SHA real revisado. [Tarefa Notebook][notebook-task] · [Git em Jobs][git-jobs]
+
+### Alternativa pela interface, se a API não estiver disponível
+
+1. Abra **Jobs & Pipelines → Create → Job** e adicione uma tarefa **Notebook** com fonte **Git provider**.
+2. Configure o repositório, a branch `main` e o path acima. Se optar por fonte **Workspace**, selecione `04_Orquestrar` no Git folder pela interface e faça Pull antes de executar uma versão nova.
+3. Selecione **Serverless** e configure **Jobs Environment → Standard versão 4**; no seletor antigo, **Environment version 4**. Preencha os parâmetros da seção 4, com a URL privada da pasta de entrada.
+4. Mantenha execução manual, concorrência máxima `1`, fila desativada e tentativas adicionais `0`. Desative **Enable serverless auto-optimization**, que pode incluir novas tentativas. Se disponível, desligue **Performance optimized** para usar **Standard**.
+5. Salve e confira a definição antes de clicar em **Run now**. Se criou o Job manualmente sem a tag do demonstrador, continue gerenciando-o na interface; `05` não deve assumir sua propriedade.
+
+O JSON publicado mantém os campos privados vazios. Para usar a CLI, prepare uma cópia privada com os parâmetros preenchidos; criar diretamente a partir do template vazio não prepara uma leitura válida. Não publique essa cópia. Uma mudança no template Git não atualiza automaticamente um Job já criado: a atualização ocorre pela interface ou ao executar `05` com os valores corretos. [Criar e gerenciar Jobs][automate] · [Contrato da API][jobs-api]
+
+O template não contém agenda, gatilho, cluster clássico ou destinatários. A disponibilidade de **Standard** e do ambiente deve ser conferida na conta Free; não é necessário mudar para um plano pago para preparar o exercício. [Jobs serverless][serverless]
 
 ## 6. Entregue os 10 CSVs em ciclos
 
@@ -122,7 +140,9 @@ Os arquivos de `data_demo/` são **sintéticos**. O [manifesto](../data_demo/man
 | 5 | `09` | Novos dias aceitos; comparar resultados e intervalos. |
 | 6 | `10` | Correção de um dia antigo; snapshot muda, corte não recua. |
 
-Mantenha os arquivos anteriores na origem. Depois dos cinco iniciais, acrescente um arquivo por vez; não é preciso mudar o limite `10` entre ciclos. Repetir o mesmo nome com o mesmo hash deve ser um no-op. Uma correção chega como arquivo novo e substitui a linha da mesma `date`, sem somar as contagens antigas. A rejeição de `07` não deve impedir o processamento posterior de `08`.
+Os cinco primeiros ficam em `01_Entrada_Databricks`; os demais começam em `02_Reserva_Proximas_Execucoes`. Depois de cada demonstração, **mova somente o próximo arquivo para a entrada e clique em Run now**, sem editar o Job. Mantenha os arquivos anteriores na entrada e o limite total `10`.
+
+Cada run relê e revalida os bytes disponíveis. Repetir os mesmos arquivos preserva o snapshot; a análise também é reutilizada se código, ambiente e configuração permanecerem iguais. As novas tentativas continuam auditadas. Uma correção chega como arquivo novo e substitui a linha da mesma `date`, sem somar as contagens antigas. A rejeição de `07` não impede o processamento posterior de `08`.
 
 ## 7. Confira a evidência antes de avançar
 
@@ -146,6 +166,9 @@ No Free, use execução manual, uma tarefa por vez e os arquivos pequenos do exe
 [parameters]: https://docs.databricks.com/aws/en/jobs/job-parameters
 [volume]: https://docs.databricks.com/aws/en/volumes/privileges
 [drive]: https://docs.databricks.com/aws/en/ingestion/google-drive
+[drive-connection]: https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-drive-connection
+[drive-managed]: https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-drive
+[read-files]: https://docs.databricks.com/aws/en/sql/language-manual/functions/read_files
 [notebook-task]: https://docs.databricks.com/aws/en/jobs/tasks/notebook
 [git-jobs]: https://docs.databricks.com/aws/en/jobs/git
 [automate]: https://docs.databricks.com/aws/en/jobs/automate
@@ -159,6 +182,7 @@ No Free, use execução manual, uma tarefa por vez e os arquivos pequenos do exe
 - [Environment 4][environment-four] e [versões e suporte][environment-versions]
 - [TensorFlow 2.18.1][tensorflow] e [TFP 0.25: compatibilidade][tfp]
 - [Parâmetros de Job][parameters] e [tarefa Notebook][notebook-task]
-- [Volumes][volume] e [Drive como fonte][drive]
+- [Drive como fonte][drive], [conexões OAuth][drive-connection] e [metadados de arquivos][read-files]
+- [Conector gerenciado, rota distinta deste notebook][drive-managed] e [Volume opcional][volume]
 - [Automação][automate], [Jobs API][jobs-api] e [Jobs serverless][serverless]
 - [Limites da Free Edition][free]

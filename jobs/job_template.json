@@ -1,6 +1,6 @@
 {
   "name": "MBA_MLOPS_CAUSALIMPACT_MANUAL",
-  "description": "Atualização manual do case em serverless Environment 4 (Python 3.12): ingerir arquivos versionados, executar CausalImpact e conferir o painel na mesma tarefa. O notebook 04_Orquestrar prepara suas dependências antes das etapas.",
+  "description": "Atualização manual a partir do Drive em serverless Environment 4 (Python 3.12). Configure source_path com a URL privada da subpasta Entrada e drive_connection. Cada run valida os CSVs presentes, executa CausalImpact quando a entrada muda e confere o painel.",
   "max_concurrent_runs": 1,
   "tags": {
     "mba_mlops_demo": "causalimpact_demo_v1"
@@ -33,11 +33,11 @@
     },
     {
       "name": "source_mode",
-      "default": "volume"
+      "default": "drive"
     },
     {
       "name": "source_path",
-      "default": "/Volumes/mba/mlops_causalimpact/landing/causalimpact_demo"
+      "default": ""
     },
     {
       "name": "drive_connection",

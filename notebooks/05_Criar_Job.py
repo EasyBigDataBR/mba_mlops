@@ -1,11 +1,12 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # 05 · Crie seu Job manual
-# MAGIC 
+# MAGIC
 # MAGIC Execute este notebook uma vez depois de conferir os parâmetros. Ele cria **MBA_MLOPS_CAUSALIMPACT_MANUAL** com uma tarefa que busca `04_Orquestrar.py` na branch `main` do GitHub.
-# MAGIC 
-# MAGIC Se o Job deste exemplo já existir com a identificação esperada, a configuração será atualizada. Jobs de outras atividades não são alterados. Nenhuma execução começa nesta célula: você controla as demonstrações pelo botão **Run now**.
-# MAGIC 
+# MAGIC Configure `source_mode=drive`, a URL privada de **01_Entrada_Databricks** em `source_path` e o nome da conexão autorizada em `drive_connection`. Use os valores que passaram na verificação do notebook 00.
+# MAGIC
+# MAGIC Se o Job deste exemplo já existir com a identificação esperada, o template e os parâmetros serão reaplicados ao mesmo ID. Isso substitui ajustes anteriores feitos na interface. Use 05 só para criar ou atualizar a configuração; para cada novo CSV, basta **Run now** no Job.
+# MAGIC
 # MAGIC O SDK usa a autenticação do notebook. Se a conta não permitir a API, use a rota de criação pela interface descrita no guia.
 
 # COMMAND ----------
@@ -62,20 +63,22 @@ print("Nenhuma run iniciada. Confira Serverless/Standard e a credencial Git; dep
 
 # MAGIC %md
 # MAGIC ## Antes de cada demonstração
-# MAGIC 
-# MAGIC 1. Acrescente somente o próximo CSV na pasta configurada.
+# MAGIC
+# MAGIC 1. Mova somente o próximo CSV de **02_Reserva_Proximas_Execucoes** para **01_Entrada_Databricks**. Preserve todos os anteriores.
 # MAGIC 2. Abra este Job e clique em **Run now**.
 # MAGIC 3. Leia o status da tarefa e abra as saídas do notebook.
 # MAGIC 4. Confira o histórico pelo notebook 03 ou pelas consultas SQL.
-# MAGIC 
+# MAGIC
+# MAGIC A configuração permanece a mesma. `max_files_per_run=10` é o limite total da pasta, não a quantidade a acrescentar. O ciclo relê os arquivos pequenos, confere seus hashes e distingue arquivos novos dos já recebidos. Repetir a mesma entrada não duplica o snapshot.
+# MAGIC
 # MAGIC O Job com fonte Git resolve `main` a cada run. Para congelar uma versão, substitua `git_branch` por `git_commit` no template, usando um SHA real do repositório. Não configure os dois campos juntos.
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## Continue por aqui
-# MAGIC 
+# MAGIC
 # MAGIC O guia [Integração Databricks](https://github.com/EasyBigDataBR/mba_mlops/blob/main/docs/INTEGRACAO_DATABRICKS.md) explica Git, Drive/Volume e parâmetros.
 # MAGIC O [roteiro da demonstração](https://github.com/EasyBigDataBR/mba_mlops/blob/main/docs/DEMONSTRACAO.md) mostra a ordem dos arquivos.
-# MAGIC 
+# MAGIC
 # MAGIC Referências oficiais: [Google TFP CausalImpact](https://github.com/google/tfp-causalimpact) · [Git em Jobs](https://docs.databricks.com/aws/en/jobs/git) · [Limites da Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations).
